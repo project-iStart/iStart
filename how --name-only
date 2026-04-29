@@ -1,0 +1,126 @@
+[33mcommit 1cb6a1ebf7c71793911ca123afbe2fac308d7374[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Tapoborota Datta <tpbrdatta@email.com>
+Date:   Wed Apr 22 21:45:24 2026 +0600
+
+    Apply .gitignore and clean project
+
+[1mdiff --git a/istart_app/.flutter-plugins-dependencies b/istart_app/.flutter-plugins-dependencies[m
+[1mnew file mode 100644[m
+[1mindex 0000000..442cf5d[m
+[1m--- /dev/null[m
+[1m+++ b/istart_app/.flutter-plugins-dependencies[m
+[36m@@ -0,0 +1 @@[m
+[32m+[m[32m{"info":"This is a generated file; do not edit or check into version control.","plugins":{"ios":[{"name":"shared_preferences_foundation","path":"C:\\\\Users\\\\tpbrd\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\hosted\\\\pub.dev\\\\shared_preferences_foundation-2.5.6\\\\","shared_darwin_source":true,"native_build":true,"dependencies":[],"dev_dependency":false}],"android":[{"name":"shared_preferences_android","path":"C:\\\\Users\\\\tpbrd\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\hosted\\\\pub.dev\\\\shared_preferences_android-2.4.23\\\\","native_build":true,"dependencies":[],"dev_dependency":false}],"macos":[{"name":"shared_preferences_foundation","path":"C:\\\\Users\\\\tpbrd\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\hosted\\\\pub.dev\\\\shared_preferences_foundation-2.5.6\\\\","shared_darwin_source":true,"native_build":true,"dependencies":[],"dev_dependency":false}],"linux":[{"name":"path_provider_linux","path":"C:\\\\Users\\\\tpbrd\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\hosted\\\\pub.dev\\\\path_provider_linux-2.2.1\\\\","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"shared_preferences_linux","path":"C:\\\\Users\\\\tpbrd\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\hosted\\\\pub.dev\\\\shared_preferences_linux-2.4.1\\\\","native_build":false,"dependencies":["path_provider_linux"],"dev_dependency":false}],"windows":[{"name":"path_provider_windows","path":"C:\\\\Users\\\\tpbrd\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\hosted\\\\pub.dev\\\\path_provider_windows-2.3.0\\\\","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"shared_preferences_windows","path":"C:\\\\Users\\\\tpbrd\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\hosted\\\\pub.dev\\\\shared_preferences_windows-2.4.1\\\\","native_build":false,"dependencies":["path_provider_windows"],"dev_dependency":false}],"web":[{"name":"shared_preferences_web","path":"C:\\\\Users\\\\tpbrd\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\hosted\\\\pub.dev\\\\shared_preferences_web-2.4.3\\\\","dependencies":[],"dev_dependency":false}]},"dependencyGraph":[{"name":"path_provider_linux","dependencies":[]},{"name":"path_provider_windows","dependencies":[]},{"name":"shared_preferences","dependencies":["shared_preferences_android","shared_preferences_foundation","shared_preferences_linux","shared_preferences_web","shared_preferences_windows"]},{"name":"shared_preferences_android","dependencies":[]},{"name":"shared_preferences_foundation","dependencies":[]},{"name":"shared_preferences_linux","dependencies":["path_provider_linux"]},{"name":"shared_preferences_web","dependencies":[]},{"name":"shared_preferences_windows","dependencies":["path_provider_windows"]}],"date_created":"2026-04-18 03:21:46.292968","version":"3.41.4","swift_package_manager_enabled":{"ios":false,"macos":false}}[m
+\ No newline at end of file[m
+[1mdiff --git a/istart_app/.gitignore b/istart_app/.gitignore[m
+[1mnew file mode 100644[m
+[1mindex 0000000..b617ea9[m
+[1m--- /dev/null[m
+[1m+++ b/istart_app/.gitignore[m
+[36m@@ -0,0 +1,24 @@[m
+[32m+[m[32m# Flutter / Dart[m
+[32m+[m[32m.dart_tool/[m
+[32m+[m[32m.packages[m
+[32m+[m[32m.pub/[m
+[32m+[m[32mbuild/[m
+[32m+[m
+[32m+[m[32m# Android[m
+[32m+[m[32mandroid/.gradle/[m
+[32m+[m[32mandroid/app/build/[m
+[32m+[m
+[32m+[m[32m# iOS / macOS[m
+[32m+[m[32mios/Flutter/ephemeral/[m
+[32m+[m[32mmacos/Flutter/ephemeral/[m
+[32m+[m
+[32m+[m[32m# Windows[m
+[32m+[m[32mwindows/flutter/ephemeral/[m
+[32m+[m
+[32m+[m[32m# IDE[m
+[32m+[m[32m.idea/[m
+[32m+[m[32m.vscode/[m
+[32m+[m
+[32m+[m[32m# Misc[m
+[32m+[m[32m*.log[m
+[32m+[m[32m*.tmp[m
+[1mdiff --git a/istart_app/.metadata b/istart_app/.metadata[m
+[1mnew file mode 100644[m
+[1mindex 0000000..89db5de[m
+[1m--- /dev/null[m
+[1m+++ b/istart_app/.metadata[m
+[36m@@ -0,0 +1,45 @@[m
+[32m+[m[32m# This file tracks properties of this Flutter project.[m
+[32m+[m[32m# Used by Flutter tool to assess capabilities and perform upgrades etc.[m
+[32m+[m[32m#[m
+[32m+[m[32m# This file should be version controlled and should not be manually edited.[m
+[32m+[m
+[32m+[m[32mversion:[m
+[32m+[m[32m  revision: "ff37bef603469fb030f2b72995ab929ccfc227f0"[m
+[32m+[m[32m  channel: "stable"[m
+[32m+[m
+[32m+[m[32mproject_type: app[m
+[32m+[m
+[32m+[m[32m# Tracks metadata for the flutter migrate command[m
+[32m+[m[32mmigration:[m
+[32m+[m[32m  platforms:[m
+[32m+[m[32m    - platform: root[m
+[32m+[m[32m      create_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m      base_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m    - platform: android[m
+[32m+[m[32m      create_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m      base_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m    - platform: ios[m
+[32m+[m[32m      create_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m      base_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m    - platform: linux[m
+[32m+[m[32m      create_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m      base_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m    - platform: macos[m
+[32m+[m[32m      create_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m      base_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m    - platform: web[m
+[32m+[m[32m      create_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m      base_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m    - platform: windows[m
+[32m+[m[32m      create_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m[32m      base_revision: ff37bef603469fb030f2b72995ab929ccfc227f0[m
+[32m+[m
+[32m+[m[32m  # User provided section[m
+[32m+[m
+[32m+[m[32m  # List of Local paths (relative to this file) that should be[m
+[32m+[m[32m  # ignored by the migrate tool.[m
+[32m+[m[32m  #[m
+[32m+[m[32m  # Files that are not part of the templates will be ignored by default.[m
+[32m+[m[32m  unmanaged_files:[m
+[32m+[m[32m    - 'lib/main.dart'[m
+[32m+[m[32m    - 'ios/Runner.xcodeproj/project.pbxproj'[m
+[1mdiff --git a/istart_app/README.md b/istart_app/README.md[m
+[1mnew file mode 100644[m
+[1mindex 0000000..a028eff[m
+[1m--- /dev/null[m
+[1m+++ b/istart_app/README.md[m
+[36m@@ -0,0 +1,17 @@[m
+[32m+[m[32m# istart_app[m
+[32m+[m
+[32m+[m[32mA new Flutter project.[m
+[32m+[m
+[32m+[m[32m## Getting Started[m
+[32m+[m
+[32m+[m[32mThis project is a starting point for a Flutter application.[m
+[32m+[m
+[32m+[m[32mA few resources to get you started if this is your first Flutter project:[m
+[32m+[m
+[32m+[m[32m- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)[m
+[32m+[m[32m- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)[m
+[32m+[m[32m- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)[m
+[32m+[m
+[32m+[m[32mFor help getting started with Flutter development, view the[m
+[32m+[m[32m[online documentation](https://docs.flutter.dev/), which offers tutorials,[m
+[32m+[m[32msamples, guidance on mobile development, and a full API reference.[m
+[1mdiff --git a/istart_app/analysis_options.yaml b/istart_app/analysis_options.yaml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0d29021[m
+[1m--- /dev/null[m
+[1m+++ b/istart_app/analysis_options.yaml[m
+[36m@@ -0,0 +1,28 @@[m
+[32m+[m[32m# This file configures the analyzer, which statically analyzes Dart code to[m
+[32m+[m[32m
