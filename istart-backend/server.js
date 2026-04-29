@@ -4,16 +4,14 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 
 dotenv.config();
-const connectDB = require('./config/db');
-
-dotenv.config();
 connectDB();
-  
+
 const app = express();
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
-}));app.use(express.json());
+}));
+app.use(express.json());
 
 // Routes
 app.use('/api/auth',          require('./routes/auth'));
