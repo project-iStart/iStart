@@ -27,6 +27,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
     if (!mounted) return;
     if (auth.error == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login successful!'),
+          backgroundColor: Color(0xFF6366F1),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       context.go('/home');
     } else {
       setState(() => _error = auth.error ?? 'Login failed.');

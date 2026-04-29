@@ -40,7 +40,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
     if (!mounted) return;
     if (auth.error == null) {
-      context.go('/home');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Registration successful! Please sign in.'),
+          backgroundColor: _accent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      context.go('/login');
     } else {
       setState(() => _error = auth.error!);
     }
