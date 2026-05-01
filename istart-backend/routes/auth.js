@@ -52,7 +52,7 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
   }
 });
 
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/auth');
 
 // GET /api/auth/profile
 router.get('/profile', authMiddleware, async (req, res) => {

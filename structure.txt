@@ -434,6 +434,7 @@ D:.
 +---istart_app
     +---.dart_tool
     ¦   +---dartpad
+    ¦   +---extension_discovery
     ¦   +---flutter_build
     ¦       +---06f04a7cd764f2e3ff64ac286cc2bdd7
     +---.idea

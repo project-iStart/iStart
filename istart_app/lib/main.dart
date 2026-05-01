@@ -10,7 +10,7 @@ import 'screens/onboarding/role_selection_screen.dart';
 import 'screens/onboarding/register_screen.dart';
 import 'screens/onboarding/login_screen.dart';
 import 'screens/home/home_screen.dart';
-import 'screens/profile_screen.dart';
+import 'screens/profile/profile_screen.dart';
 
 final _router = GoRouter(
   initialLocation: '/',
