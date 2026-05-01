@@ -33,6 +33,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+      // fetch fresh profile from backend
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<AuthProvider>().fetchProfile();
+      });
     final user = context.read<AuthProvider>().user!;
     _nameCtrl         = TextEditingController(text: user.name);
     _bioCtrl          = TextEditingController(text: user.bio);
