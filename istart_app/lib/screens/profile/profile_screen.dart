@@ -158,6 +158,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _readOnlyField(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(label,
+            style: const TextStyle(
+                color: Colors.white70, fontSize: 12, fontFamily: 'DM Sans')),
+        const SizedBox(height: 6),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Text(value,
+              style: const TextStyle(
+                  color: Colors.white54, fontFamily: 'DM Sans')),
+        ),
+      ]),
+    );
+  }
+
   Widget _roleSection(UserModel user) {
     if (user.role == 'founder') {
       return Column(children: [
@@ -258,7 +282,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Common fields
           const _SectionHeader('Basic Info'),
           _field('Name', _nameCtrl),
-          _field('Email', TextEditingController(text: user.email)),
+          _readOnlyField('Email', user.email),
           _field('Bio', _bioCtrl, maxLines: 3, hint: 'Tell the community about yourself...'),
 
           const SizedBox(height: 8),

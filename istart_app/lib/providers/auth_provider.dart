@@ -90,7 +90,9 @@ class AuthProvider extends ChangeNotifier {
       _user = UserModel.fromJson(updated);
       notifyListeners();
       return true;
-    } catch (_) {
+    } catch (e) {
+      print('updateProfile error: $e');
+      _error = e.toString();
       return false;
     }
   }
