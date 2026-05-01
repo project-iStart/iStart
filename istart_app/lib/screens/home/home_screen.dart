@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../feed/feed_screen.dart';
+import '../profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,8 +18,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const _pages = [
     FeedScreen(),
-    // ProfileScreen() ← add later
-    // NotificationsScreen() ← add later
+    SizedBox.shrink(), // Saved — placeholder for now
+    SizedBox.shrink(), // Alerts — placeholder for now
+    ProfileScreen(),
   ];
 
   @override

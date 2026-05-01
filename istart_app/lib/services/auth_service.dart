@@ -10,13 +10,16 @@ class AuthService {
     String? bio,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post('/auth/register', data: {
-      'name': name,
-      'email': email,
-      'password': password,
-      'role': role,
-      if (bio != null) 'bio': bio,
-    });
+    final res = await dio.post(
+      '/auth/register',
+      data: {
+        'name': name,
+        'email': email,
+        'password': password,
+        'role': role,
+        if (bio != null) 'bio': bio,
+      },
+    );
     await _saveToken(res.data['token']);
     return res.data;
   }
@@ -26,10 +29,10 @@ class AuthService {
     required String password,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post('/auth/login', data: {
-      'email': email,
-      'password': password,
-    });
+    final res = await dio.post(
+      '/auth/login',
+      data: {'email': email, 'password': password},
+    );
     await _saveToken(res.data['token']);
     return res.data;
   }
@@ -47,5 +50,17 @@ class AuthService {
   Future<void> _saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
+  }
+
+  Future<Map<String, dynamic>> getProfile() async {
+    final dio = await ApiClient.getClient();
+    final response = await dio.get('/auth/profile');
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
+    final dio = await ApiClient.getClient();
+    final response = await dio.put('/auth/profile', data: data);
+    return response.data;
   }
 }

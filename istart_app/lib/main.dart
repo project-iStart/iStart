@@ -10,6 +10,7 @@ import 'screens/onboarding/role_selection_screen.dart';
 import 'screens/onboarding/register_screen.dart';
 import 'screens/onboarding/login_screen.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/profile_screen.dart';
 
 final _router = GoRouter(
   initialLocation: '/',
@@ -36,6 +37,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/home',
       builder: (_, __) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(),
     ),
   ],
 );
