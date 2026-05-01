@@ -52,4 +52,43 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
   }
 });
 
+const authMiddleware = require('../middleware/authMiddleware');
+
+// GET /api/auth/profile
+router.get('/profile', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PUT /api/auth/profile
+router.put('/profile', authMiddleware, async (req, res) => {
+  try {
+    const allowedFields = [
+      'name', 'bio',
+      'companyName', 'startupStage',      // founder
+      'skills', 'availability',            // collaborator
+      'investmentFocus', 'portfolioLink',  // investor
+    ];
+    const updates = {};
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    });
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: updates },
+      { new: true }
+    ).select('-password');
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

@@ -5,7 +5,18 @@ const UserSchema = new mongoose.Schema({
   email:    { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['founder', 'collaborator', 'investor'], required: true },
-  bio:      { type: String },
+  bio:      { type: String, default: '' },
+  // Founder-specific
+  companyName: { type: String, default: '' },
+  startupStage: { type: String, default: '' },
+
+  // Collaborator-specific
+  skills: { type: [String], default: [] },
+  availability: { type: String, default: '' },
+
+  // Investor-specific
+  investmentFocus: { type: String, default: '' },
+  portfolioLink: { type: String, default: '' },
   profileImage: { type: String },
 }, { timestamps: true });
 
