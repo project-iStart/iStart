@@ -26,22 +26,19 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchUnreadCount();
   }
 
-  Future<void> _fetchUnreadCount() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      if (token == null) return;
-      final service = NotificationService();
-      final raw = await service.getNotifications(token);
-      final unread = raw
-          .where((n) => n['isRead'] == false || n['read'] == false)
-          .length;
-      debugPrint('UNREAD COUNT: $unread'); // ← add this
-      if (mounted) setState(() => _unreadCount = unread);
-    } catch (e) {
-      debugPrint('FETCH UNREAD ERROR: $e'); // ← add this
-    }
+Future<void> _fetchUnreadCount() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return;
+    final service = NotificationService();
+    final raw = await service.getNotifications(token);
+    final unread = raw.where((n) => n['isRead'] == false).length;
+    if (mounted) setState(() => _unreadCount = unread);
+  } catch (e) {
+    debugPrint('FETCH UNREAD ERROR: $e');
   }
+}
 
   List<Widget> get _pages => [
     const FeedScreen(),
@@ -73,12 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Color _accentForRole(String role) {
     switch (role) {
-      case 'collaborator':
-        return const Color(0xFF10B981);
-      case 'investor':
-        return const Color(0xFFF59E0B);
-      default:
-        return const Color(0xFF6366F1);
+      case 'collaborator': return const Color(0xFF10B981);
+      case 'investor': return const Color(0xFFF59E0B);
+      default: return const Color(0xFF6366F1);
     }
   }
 }
@@ -114,35 +108,10 @@ class _BottomNav extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _NavItem(
-                icon: Icons.grid_view_rounded,
-                label: 'Feed',
-                selected: currentIndex == 0,
-                accent: accent,
-                onTap: () => onTap(0),
-              ),
-              _NavItem(
-                icon: Icons.bookmark_outline_rounded,
-                label: 'Saved',
-                selected: currentIndex == 1,
-                accent: accent,
-                onTap: () => onTap(1),
-              ),
-              _NavItem(
-                icon: Icons.notifications_none_rounded,
-                label: 'Alerts',
-                selected: currentIndex == 2,
-                accent: accent,
-                onTap: () => onTap(2),
-                badge: unreadCount,
-              ),
-              _NavItem(
-                icon: Icons.person_outline_rounded,
-                label: 'Profile',
-                selected: currentIndex == 3,
-                accent: accent,
-                onTap: () => onTap(3),
-              ),
+              _NavItem(icon: Icons.grid_view_rounded, label: 'Feed', selected: currentIndex == 0, accent: accent, onTap: () => onTap(0)),
+              _NavItem(icon: Icons.bookmark_outline_rounded, label: 'Saved', selected: currentIndex == 1, accent: accent, onTap: () => onTap(1)),
+              _NavItem(icon: Icons.notifications_none_rounded, label: 'Alerts', selected: currentIndex == 2, accent: accent, onTap: () => onTap(2), badge: unreadCount),
+              _NavItem(icon: Icons.person_outline_rounded, label: 'Profile', selected: currentIndex == 3, accent: accent, onTap: () => onTap(3)),
             ],
           ),
         ),
