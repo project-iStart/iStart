@@ -5,9 +5,11 @@ const JoinRequest = require('../models/JoinRequest');
 const StartupIdea = require('../models/StartupIdea');
 const Notification = require('../models/Notification');
 
-// POST /api/join-requests — collaborator sends request
+// POST — collaborator sends request
 router.post('/', auth, async (req, res) => {
-  if (req.user.role !== 'Collaborator') return res.status(403).json({ msg: 'Only Collaborators can send join requests' });
+  if (req.user.role !== 'collaborator')
+    return res.status(403).json({ msg: 'Only Collaborators can send join requests' });
+
   const { startupIdeaId, message } = req.body;
   try {
     const existing = await JoinRequest.findOne({ collaborator: req.user.id, startupIdea: startupIdeaId });
@@ -19,8 +21,8 @@ router.post('/', auth, async (req, res) => {
     const idea = await StartupIdea.findById(startupIdeaId);
     await Notification.create({
       user: idea.founder,
-      message: `New join request for "${idea.title}".`,
-      type: 'joinRequest',
+      message: `New join request received for "${idea.title}".`,
+      type: 'join_request', 
       refId: request._id
     });
 
@@ -30,7 +32,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// GET /api/join-requests/:ideaId — founder views requests
+// GET — founder views requests
 router.get('/:ideaId', auth, async (req, res) => {
   try {
     const requests = await JoinRequest.find({ startupIdea: req.params.ideaId })
@@ -41,7 +43,7 @@ router.get('/:ideaId', auth, async (req, res) => {
   }
 });
 
-// PUT /api/join-requests/:id — approve or reject
+// PUT — founder approves or rejects
 router.put('/:id', auth, async (req, res) => {
   const { status } = req.body; // 'approved' or 'rejected'
   try {
@@ -49,7 +51,8 @@ router.put('/:id', auth, async (req, res) => {
     if (!request) return res.status(404).json({ msg: 'Request not found' });
 
     const idea = await StartupIdea.findById(request.startupIdea);
-    if (idea.founder.toString() !== req.user.id) return res.status(403).json({ msg: 'Not authorized' });
+    if (idea.founder.toString() !== req.user.id)
+      return res.status(403).json({ msg: 'Not authorized' });
 
     request.status = status;
     await request.save();
@@ -58,6 +61,16 @@ router.put('/:id', auth, async (req, res) => {
       idea.teamMembers.push(request.collaborator);
       await idea.save();
     }
+
+    // Notify the collaborator of the decision
+    await Notification.create({
+      user: request.collaborator,
+      message: status === 'approved'
+        ? `Your join request for "${idea.title}" was approved!`
+        : `Your join request for "${idea.title}" was rejected.`,
+      type: 'join_request',
+      refId: idea._id
+    });
 
     res.json(request);
   } catch (err) {
