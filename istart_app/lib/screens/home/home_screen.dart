@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../feed/feed_screen.dart';
 import '../profile/profile_screen.dart';
+import '../notifications/notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,11 +17,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  static const _pages = [
-    FeedScreen(),
-    SizedBox.shrink(), // Saved — placeholder for now
-    SizedBox.shrink(), // Alerts — placeholder for now
-    ProfileScreen(),
+  List<Widget> get _pages => [
+    const FeedScreen(),
+    const SizedBox.shrink(), // Saved — placeholder
+    const NotificationScreen(), // Alerts ✓
+    const ProfileScreen(),
   ];
 
   @override
