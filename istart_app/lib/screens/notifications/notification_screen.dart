@@ -5,7 +5,8 @@ import '../../models/notification_model.dart';
 import '../../services/notification_services.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  final VoidCallback? onRead; // ← added
+  const NotificationScreen({super.key, this.onRead}); // ← added
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -27,13 +28,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('token');
     if (_token == null) {
-      setState(() {
-        _loading = false;
-      });
-      // Optionally, show a message or redirect to login
+      setState(() => _loading = false);
       return;
     }
-
     try {
       final raw = await _service.getNotifications(_token!);
       setState(() {
@@ -58,6 +55,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         relatedIdea: n.relatedIdea,
       );
     });
+    widget.onRead?.call(); // ← added
   }
 
   Future<void> _markAllAsRead() async {
@@ -73,6 +71,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         relatedIdea: n.relatedIdea,
       )).toList();
     });
+    widget.onRead?.call(); // ← added
   }
 
   IconData _iconForType(String type) {
@@ -88,10 +87,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Color _colorForType(String type) {
     switch (type) {
-      case 'vote': return const Color(0xFF6366F1);       // Indigo
-      case 'feedback': return const Color(0xFF10B981);   // Emerald
+      case 'vote': return const Color(0xFF6366F1);
+      case 'feedback': return const Color(0xFF10B981);
       case 'join_request': return const Color(0xFF6366F1);
-      case 'doc_request': return const Color(0xFFF59E0B); // Amber
+      case 'doc_request': return const Color(0xFFF59E0B);
       case 'fund_interest': return const Color(0xFFF59E0B);
       default: return Colors.grey;
     }
@@ -214,7 +213,6 @@ class _NotificationTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon badge
             Container(
               width: 42,
               height: 42,
@@ -225,7 +223,6 @@ class _NotificationTile extends StatelessWidget {
               child: Icon(icon, color: iconColor, size: 20),
             ),
             const SizedBox(width: 12),
-            // Message + time
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +250,6 @@ class _NotificationTile extends StatelessWidget {
                 ],
               ),
             ),
-            // Unread dot
             if (!notification.isRead)
               Container(
                 width: 8,
