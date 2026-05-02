@@ -36,7 +36,7 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/ideas — create idea (Founder only)
 router.post('/', auth, async (req, res) => {
-  if (req.user.role !== 'Founder') return res.status(403).json({ msg: 'Only Founders can post ideas' });
+  if (req.user.role !== 'founder') return res.status(403).json({ msg: 'Only Founders can post ideas' });
   try {
     const { title, description, problemStatement, category, stage, pitchDeckUrl } = req.body;
     const idea = new StartupIdea({
