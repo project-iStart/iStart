@@ -115,4 +115,26 @@ class IdeaProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  Future<void> fundInterest(String ideaId) async {
+    // optimistic update
+    final idx = _ideas.indexWhere((i) => i.id == ideaId);
+    if (idx == -1) return;
+
+    final old = _ideas[idx];
+    _ideas[idx] = old.copyWith(
+      hasFundingInterest: true,
+      fundingInterestCount: old.fundingInterestCount + 1,
+    );
+    notifyListeners();
+
+    try {
+      await _service.fundInterest(ideaId);
+    } catch (e) {
+      // rollback
+      _ideas[idx] = old;
+      notifyListeners();
+      rethrow;
+    }
+  }
 }

@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const optionalAuth = require('../middleware/optionalAuth');
 const StartupIdea = require('../models/StartupIdea');
 const Vote = require('../models/Vote');
+const Notification = require('../models/Notification');
 
 // GET /api/ideas — browse all ideas
 router.get('/', optionalAuth, async (req, res) => {
@@ -156,6 +157,45 @@ router.post('/:id/bookmark', auth, async (req, res) => {
     res.json({ bookmarked: index === -1 });
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// POST /api/ideas/:id/fund-interest  (Investor only)
+router.post('/:id/fund-interest', auth, async (req, res) => {
+  try {
+    const idea = await StartupIdea.findById(req.params.id).populate('founder', 'name email');
+    if (!idea) return res.status(404).json({ message: 'Idea not found' });
+
+    if (req.user.role !== 'investor') {
+      return res.status(403).json({ message: 'Only investors can express funding interest' });
+    }
+
+    const alreadyExpressed = idea.fundingInterests.some(
+      (f) => f.investor.toString() === req.user.id
+    );
+    if (alreadyExpressed) {
+      return res.status(400).json({ message: 'You have already expressed interest in this idea' });
+    }
+
+    idea.fundingInterests.push({ investor: req.user.id });
+    await idea.save();
+
+    // Notify the Founder
+    await Notification.create({
+      recipient: idea.founder._id,
+      type: 'fund_interest',
+      message: `An investor expressed funding interest in your idea "${idea.title}"`,
+      triggeredBy: req.user.id,
+      idea: idea._id,
+    });
+
+    res.json({
+      message: 'Funding interest expressed successfully',
+      fundingInterestCount: idea.fundingInterests.length,
+      hasFundingInterest: true,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
