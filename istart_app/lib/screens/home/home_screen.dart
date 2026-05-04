@@ -8,6 +8,7 @@ import '../../services/notification_services.dart';
 import '../feed/feed_screen.dart';
 import '../notifications/notification_screen.dart';
 import '../profile/profile_screen.dart';
+import '../saved/saved_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,7 +43,7 @@ Future<void> _fetchUnreadCount() async {
 
   List<Widget> get _pages => [
     const FeedScreen(),
-    const SizedBox.shrink(),
+    const SavedScreen(),        // ← was SizedBox.shrink()
     NotificationScreen(onRead: _fetchUnreadCount),
     const ProfileScreen(),
   ];

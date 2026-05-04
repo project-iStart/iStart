@@ -1,5 +1,3 @@
-// lib/providers/idea_provider.dart
-
 import 'package:flutter/material.dart';
 import '../models/startup_idea.dart';
 import '../services/idea_service.dart';
@@ -13,6 +11,8 @@ class IdeaProvider extends ChangeNotifier {
   String? _error;
 
   List<StartupIdea> get ideas => _ideas;
+  List<StartupIdea> get bookmarkedIdeas =>
+      _ideas.where((i) => i.isBookmarked).toList();
   StartupIdea? get selectedIdea => _selectedIdea;
   bool get loading => _loading;
   String? get error => _error;
@@ -49,7 +49,8 @@ class IdeaProvider extends ChangeNotifier {
   Future<bool> createIdea(Map<String, dynamic> data) async {
     _setLoading(true);
     try {
-      await _service.createIdea(title: data['title'], description: data['description']);
+      await _service.createIdea(
+          title: data['title'], description: data['description']);
       await fetchIdeas();
       return true;
     } catch (e) {
@@ -72,15 +73,54 @@ class IdeaProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleBookmark(String id) async {
+  /// Optimistic toggle — flips locally first, calls API, reverts on failure.
+  Future<void> toggleVote(String ideaId, String currentUserId) async {
+    final idx = _ideas.indexWhere((i) => i.id == ideaId);
+    if (idx == -1) return;
+
+    final idea = _ideas[idx];
+
+    // Founder cannot vote on their own idea
+    final founderId = idea.founder['_id']?.toString() ?? '';
+    if (founderId == currentUserId) return;
+
+    final wasVoted = idea.isVoted;
+    final newVoted = !wasVoted;
+    final newCount = newVoted ? idea.voteCount + 1 : idea.voteCount - 1;
+
+    // Optimistic update
+    _ideas[idx] = idea.copyWith(isVoted: newVoted, voteCount: newCount);
+    notifyListeners();
+
     try {
-      await _service.toggleBookmark(id);
-      final idx = _ideas.indexWhere((i) => i.id == id);
-      if (idx != -1) {
-        // Optimistic toggle — refetch for server truth
-        await fetchIdeas();
-      }
+      await _service.toggleVote(ideaId);
+      // Notification is only sent server-side on first upvote (not on re-vote).
+      // Backend handles this logic — no extra call needed here.
     } catch (e) {
+      // Revert on failure
+      _ideas[idx] = idea;
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Optimistic toggle — flips locally first, calls API, reverts on failure.
+  Future<void> toggleBookmark(String ideaId) async {
+    final idx = _ideas.indexWhere((i) => i.id == ideaId);
+    if (idx == -1) return;
+
+    final idea = _ideas[idx];
+    final newBookmarked = !idea.isBookmarked;
+
+    // Optimistic update
+    _ideas[idx] = idea.copyWith(isBookmarked: newBookmarked);
+    notifyListeners();
+
+    try {
+      await _service.toggleBookmark(ideaId);
+    } catch (e) {
+      // Revert on failure
+      _ideas[idx] = idea;
       _error = e.toString();
       notifyListeners();
     }
