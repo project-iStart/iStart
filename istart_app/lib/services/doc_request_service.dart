@@ -29,7 +29,7 @@ class DocRequestService {
     final dio = await ApiClient.getClient();
     final res = await dio.patch('/doc-requests/$requestId/reply', data: {
       'replyMessage': replyMessage,
-      if (fileUrl != null) 'fileUrl': fileUrl,
+      'fileUrl': ?fileUrl,
     });
     return res.data;
   }

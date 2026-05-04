@@ -3,14 +3,11 @@ import 'package:provider/provider.dart';
 import '../models/startup_idea.dart';
 import '../providers/idea_provider.dart';
 import '../providers/auth_provider.dart';
+import '../screens/idea_detail_screen.dart';
 import 'rocket_icon.dart';
 
 class IdeaCard extends StatelessWidget {
-  const IdeaCard({
-    super.key,
-    required this.idea,
-    required this.accent,
-  });
+  const IdeaCard({super.key, required this.idea, required this.accent});
 
   final StartupIdea idea;
   final Color accent;
@@ -26,7 +23,12 @@ class IdeaCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-          // context.go('/idea/${idea.id}') ← wire when detail screen is ready
+          // Navigate to detail screen
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => IdeaDetailScreen(ideaId: idea.id),
+            ),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(18),
@@ -39,7 +41,9 @@ class IdeaCard extends StatelessWidget {
                   if (idea.category != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: accent.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(20),
@@ -93,8 +97,11 @@ class IdeaCard extends StatelessWidget {
               Row(
                 children: [
                   if (idea.stage != null) ...[
-                    Icon(Icons.circle,
-                        size: 6, color: Colors.white.withOpacity(0.25)),
+                    Icon(
+                      Icons.circle,
+                      size: 6,
+                      color: Colors.white.withOpacity(0.25),
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       idea.stage!,
@@ -109,7 +116,9 @@ class IdeaCard extends StatelessWidget {
                     const SizedBox(width: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF59E0B).withOpacity(0.12),
                         borderRadius: BorderRadius.circular(20),
@@ -161,9 +170,10 @@ class _VoteButtonState extends State<_VoteButton>
       vsync: this,
       duration: const Duration(milliseconds: 160),
     );
-    _scale = Tween<double>(begin: 1.0, end: 1.35).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.35,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -240,9 +250,10 @@ class _BookmarkButtonState extends State<_BookmarkButton>
       vsync: this,
       duration: const Duration(milliseconds: 160),
     );
-    _scale = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override

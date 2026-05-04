@@ -12,23 +12,95 @@ class IdeaProvider extends ChangeNotifier {
   bool _loading = false;
   String? _error;
 
-  List<StartupIdea> get ideas => _ideas;
+  // Filter state
+  String _searchQuery = '';
+  String? _selectedCategory;
+  String? _selectedStage;
+
+  List<StartupIdea> get ideas => _filteredIdeas;
+  List<StartupIdea> get allIdeas => _ideas;
   List<StartupIdea> get bookmarkedIdeas =>
       _ideas.where((idea) => idea.isBookmarked).toList();
   StartupIdea? get selectedIdea => _selectedIdea;
   bool get loading => _loading;
   String? get error => _error;
 
+  // Filter getters
+  String get searchQuery => _searchQuery;
+  String? get selectedCategory => _selectedCategory;
+  String? get selectedStage => _selectedStage;
+
+  /// Returns filtered list based on current search and filter state
+  List<StartupIdea> get _filteredIdeas {
+    return _ideas.where((idea) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        if (!idea.title.toLowerCase().contains(query) &&
+            !idea.description.toLowerCase().contains(query) &&
+            !(idea.category?.toLowerCase().contains(query) ?? false)) {
+          return false;
+        }
+      }
+
+      // Category filter
+      if (_selectedCategory != null && idea.category != _selectedCategory) {
+        return false;
+      }
+
+      // Stage filter
+      if (_selectedStage != null && idea.stage != _selectedStage) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+  }
+
   void _setLoading(bool val) {
     _loading = val;
     notifyListeners();
   }
 
-  Future<void> fetchIdeas() async {
+  /// Update search query and refresh filtered results
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  /// Update selected category filter
+  void setSelectedCategory(String? category) {
+    _selectedCategory = category;
+    notifyListeners();
+  }
+
+  /// Update selected stage filter
+  void setSelectedStage(String? stage) {
+    _selectedStage = stage;
+    notifyListeners();
+  }
+
+  /// Clear all filters
+  void clearFilters() {
+    _searchQuery = '';
+    _selectedCategory = null;
+    _selectedStage = null;
+    notifyListeners();
+  }
+
+  Future<void> fetchIdeas({
+    String? category,
+    String? stage,
+    String? search,
+  }) async {
     _setLoading(true);
     _error = null;
     try {
-      _ideas = await _service.getIdeas();
+      _ideas = await _service.getIdeas(
+        category: category,
+        stage: stage,
+        search: search,
+      );
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -59,8 +131,9 @@ class IdeaProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _error = e.toString();
-      _setLoading(false);
       return false;
+    } finally {
+      _setLoading(false);
     }
   }
 

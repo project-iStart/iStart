@@ -17,7 +17,7 @@ class AuthService {
         'email': email,
         'password': password,
         'role': role,
-        if (bio != null) 'bio': bio,
+        'bio': ?bio,
       },
     );
     await _saveToken(res.data['token']);

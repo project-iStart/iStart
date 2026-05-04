@@ -2,13 +2,18 @@ import 'api_client.dart';
 import '../models/startup_idea.dart';
 
 class IdeaService {
-  Future<List<StartupIdea>> getIdeas({String? category, String? stage, String? search}) async {
+  Future<List<StartupIdea>> getIdeas({
+    String? category,
+    String? stage,
+    String? search,
+  }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.get('/ideas', queryParameters: {
-      if (category != null) 'category': category,
-      if (stage != null) 'stage': stage,
-      if (search != null) 'search': search,
-    });
+    final params = <String, dynamic>{};
+    if (category != null) params['category'] = category;
+    if (stage != null) params['stage'] = stage;
+    if (search != null) params['search'] = search;
+
+    final res = await dio.get('/ideas', queryParameters: params);
     return (res.data as List).map((e) => StartupIdea.fromJson(e)).toList();
   }
 
@@ -27,14 +32,13 @@ class IdeaService {
     String? pitchDeckUrl,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post('/ideas', data: {
-      'title': title,
-      'description': description,
-      if (problemStatement != null) 'problemStatement': problemStatement,
-      if (category != null) 'category': category,
-      if (stage != null) 'stage': stage,
-      if (pitchDeckUrl != null) 'pitchDeckUrl': pitchDeckUrl,
-    });
+    final data = <String, dynamic>{'title': title, 'description': description};
+    if (problemStatement != null) data['problemStatement'] = problemStatement;
+    if (category != null) data['category'] = category;
+    if (stage != null) data['stage'] = stage;
+    if (pitchDeckUrl != null) data['pitchDeckUrl'] = pitchDeckUrl;
+
+    final res = await dio.post('/ideas', data: data);
     return StartupIdea.fromJson(res.data);
   }
 
