@@ -13,6 +13,8 @@ class IdeaProvider extends ChangeNotifier {
   String? _error;
 
   List<StartupIdea> get ideas => _ideas;
+  List<StartupIdea> get bookmarkedIdeas =>
+      _ideas.where((idea) => idea.isBookmarked).toList();
   StartupIdea? get selectedIdea => _selectedIdea;
   bool get loading => _loading;
   String? get error => _error;
@@ -49,7 +51,10 @@ class IdeaProvider extends ChangeNotifier {
   Future<bool> createIdea(Map<String, dynamic> data) async {
     _setLoading(true);
     try {
-      await _service.createIdea(title: data['title'], description: data['description']);
+      await _service.createIdea(
+        title: data['title'],
+        description: data['description'],
+      );
       await fetchIdeas();
       return true;
     } catch (e) {
@@ -77,8 +82,28 @@ class IdeaProvider extends ChangeNotifier {
       await _service.toggleBookmark(id);
       final idx = _ideas.indexWhere((i) => i.id == id);
       if (idx != -1) {
-        // Optimistic toggle — refetch for server truth
-        await fetchIdeas();
+        final current = _ideas[idx];
+        _ideas[idx] = current.copyWith(isBookmarked: !current.isBookmarked);
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleVote(String id, [String? currentUserId]) async {
+    try {
+      await _service.toggleVote(id);
+      final idx = _ideas.indexWhere((i) => i.id == id);
+      if (idx != -1) {
+        final current = _ideas[idx];
+        final isVoted = !current.isVoted;
+        _ideas[idx] = current.copyWith(
+          isVoted: isVoted,
+          voteCount: isVoted ? current.voteCount + 1 : current.voteCount - 1,
+        );
+        notifyListeners();
       }
     } catch (e) {
       _error = e.toString();
