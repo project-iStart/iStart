@@ -1,9 +1,9 @@
-// lib/widgets/idea_card.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/startup_idea.dart';
 import '../providers/idea_provider.dart';
+import '../providers/auth_provider.dart';
+import 'rocket_icon.dart';
 
 class IdeaCard extends StatelessWidget {
   const IdeaCard({
@@ -55,7 +55,7 @@ class IdeaCard extends StatelessWidget {
                       ),
                     ),
                   const Spacer(),
-                  _BookmarkButton(ideaId: idea.id, accent: accent),
+                  _BookmarkButton(idea: idea, accent: accent),
                 ],
               ),
               const SizedBox(height: 12),
@@ -89,7 +89,7 @@ class IdeaCard extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Bottom row — stage + funding interest badge + community score
+              // Bottom row — stage + funding badge + rocket vote
               Row(
                 children: [
                   if (idea.stage != null) ...[
@@ -126,18 +126,7 @@ class IdeaCard extends StatelessWidget {
                     ),
                   ],
                   const Spacer(),
-                  Icon(Icons.keyboard_arrow_up_rounded,
-                      size: 16, color: Colors.white.withOpacity(0.3)),
-                  const SizedBox(width: 2),
-                  Text(
-                    '${idea.communityScore}',
-                    style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withOpacity(0.4),
-                    ),
-                  ),
+                  _VoteButton(idea: idea, accent: accent),
                 ],
               ),
             ],
@@ -148,21 +137,196 @@ class IdeaCard extends StatelessWidget {
   }
 }
 
-class _BookmarkButton extends StatelessWidget {
-  const _BookmarkButton({required this.ideaId, required this.accent});
+// ─── Rocket Vote Button ───────────────────────────────────────────────────────
 
-  final String ideaId;
+class _VoteButton extends StatefulWidget {
+  const _VoteButton({required this.idea, required this.accent});
+
+  final StartupIdea idea;
   final Color accent;
+
+  @override
+  State<_VoteButton> createState() => _VoteButtonState();
+}
+
+class _VoteButtonState extends State<_VoteButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.35).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+
+    if (!mounted) return;
+    final auth = context.read<AuthProvider>();
+    final currentUserId = auth.user?.id ?? '';
+    context.read<IdeaProvider>().toggleVote(widget.idea.id, currentUserId);
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.read<IdeaProvider>().toggleBookmark(ideaId),
-      child: Icon(
-        Icons.bookmark_border_rounded,
-        size: 20,
-        color: Colors.white.withOpacity(0.3),
+      onTap: _onTap,
+      child: Row(
+        children: [
+          ScaleTransition(
+            scale: _scale,
+            child: RocketIcon(
+              color: widget.idea.isVoted
+                  ? widget.accent
+                  : Colors.white.withOpacity(0.35),
+              size: 18,
+              filled: widget.idea.isVoted,
+            ),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            '${widget.idea.voteCount}',
+            style: TextStyle(
+              fontFamily: 'DM Sans',
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: widget.idea.isVoted
+                  ? widget.accent
+                  : Colors.white.withOpacity(0.4),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+// ─── Bookmark Button ──────────────────────────────────────────────────────────
+
+class _BookmarkButton extends StatefulWidget {
+  const _BookmarkButton({required this.idea, required this.accent});
+
+  final StartupIdea idea;
+  final Color accent;
+
+  @override
+  State<_BookmarkButton> createState() => _BookmarkButtonState();
+}
+
+class _BookmarkButtonState extends State<_BookmarkButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.3).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+    if (!mounted) return;
+    context.read<IdeaProvider>().toggleBookmark(widget.idea.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _onTap,
+      child: ScaleTransition(
+        scale: _scale,
+        child: _BookmarkIcon(
+          color: widget.idea.isBookmarked
+              ? widget.accent
+              : Colors.white.withOpacity(0.35),
+          filled: widget.idea.isBookmarked,
+          size: 20,
+        ),
+      ),
+    );
+  }
+}
+
+class _BookmarkIcon extends StatelessWidget {
+  const _BookmarkIcon({
+    required this.color,
+    required this.filled,
+    this.size = 20,
+  });
+
+  final Color color;
+  final bool filled;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _BookmarkPainter(color: color, filled: filled),
+    );
+  }
+}
+
+class _BookmarkPainter extends CustomPainter {
+  _BookmarkPainter({required this.color, required this.filled});
+
+  final Color color;
+  final bool filled;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round
+      ..style = filled ? PaintingStyle.fill : PaintingStyle.stroke;
+
+    // Classic ribbon bookmark shape with a V-notch at the bottom
+    final path = Path()
+      ..moveTo(w * 0.15, 0)
+      ..lineTo(w * 0.85, 0)
+      ..lineTo(w * 0.85, h * 0.92)
+      ..lineTo(w * 0.5, h * 0.70)
+      ..lineTo(w * 0.15, h * 0.92)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_BookmarkPainter old) =>
+      old.color != color || old.filled != filled;
 }

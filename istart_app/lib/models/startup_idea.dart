@@ -1,5 +1,3 @@
-// lib/models/startup_idea.dart
-
 class StartupIdea {
   final String id;
   final String title;
@@ -12,6 +10,9 @@ class StartupIdea {
   final bool fundingInterest;
   final Map<String, dynamic> founder;
   final List<dynamic> teamMembers;
+  final bool isBookmarked;
+  final bool isVoted;
+  final int voteCount;
 
   StartupIdea({
     required this.id,
@@ -25,19 +26,47 @@ class StartupIdea {
     required this.fundingInterest,
     required this.founder,
     required this.teamMembers,
+    this.isBookmarked = false,
+    this.isVoted = false,
+    this.voteCount = 0,
   });
 
   factory StartupIdea.fromJson(Map<String, dynamic> json) => StartupIdea(
-    id: json['_id'],
-    title: json['title'],
-    description: json['description'],
-    problemStatement: json['problemStatement'],
-    category: json['category'],
-    stage: json['stage'],
-    pitchDeckUrl: json['pitchDeckUrl'],
-    communityScore: json['communityScore'] ?? 0,
-    fundingInterest: json['fundingInterest'] ?? false,
-    founder: json['founder'] ?? {},
-    teamMembers: json['teamMembers'] ?? [],
-  );
+        id: json['_id'] ?? '',
+        title: json['title'] ?? '',
+        description: json['description'] ?? '',
+        problemStatement: json['problemStatement'],
+        category: json['category'],
+        stage: json['stage'],
+        pitchDeckUrl: json['pitchDeckUrl'],
+        communityScore: json['communityScore'] ?? 0,
+        fundingInterest: json['fundingInterest'] ?? false,
+        founder: json['founder'] ?? {},
+        teamMembers: json['teamMembers'] ?? [],
+        isBookmarked: json['isBookmarked'] ?? false,
+        isVoted: json['isVoted'] ?? false,
+        voteCount: json['voteCount'] ?? 0,
+      );
+
+  StartupIdea copyWith({
+    bool? isBookmarked,
+    bool? isVoted,
+    int? voteCount,
+  }) =>
+      StartupIdea(
+        id: id,
+        title: title,
+        description: description,
+        problemStatement: problemStatement,
+        category: category,
+        stage: stage,
+        pitchDeckUrl: pitchDeckUrl,
+        communityScore: communityScore,
+        fundingInterest: fundingInterest,
+        founder: founder,
+        teamMembers: teamMembers,
+        isBookmarked: isBookmarked ?? this.isBookmarked,
+        isVoted: isVoted ?? this.isVoted,
+        voteCount: voteCount ?? this.voteCount,
+      );
 }
