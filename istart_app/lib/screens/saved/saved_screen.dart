@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/idea_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../widgets/idea_card.dart';
+import '../../../providers/idea_provider.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../widgets/idea_card.dart';
 
 class SavedScreen extends StatefulWidget {
   const SavedScreen({super.key});

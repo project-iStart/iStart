@@ -1,148 +1,224 @@
-// lib/screens/feed/feed_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/idea_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../widgets/idea_card.dart';
+import '../models/startup_idea.dart';
+import '../providers/idea_provider.dart';
+import '../providers/auth_provider.dart';
+import 'rocket_icon.dart';
 
-class FeedScreen extends StatefulWidget {
-  const FeedScreen({super.key});
+class IdeaCard extends StatelessWidget {
+  const IdeaCard({
+    super.key,
+    required this.idea,
+    required this.accent,
+  });
+
+  final StartupIdea idea;
+  final Color accent;
 
   @override
-  State<FeedScreen> createState() => _FeedScreenState();
+  Widget build(BuildContext context) {
+    // Always read live idea from provider by ID
+    final live = context.watch<IdeaProvider>().ideas.firstWhere(
+          (i) => i.id == idea.id,
+          orElse: () => idea,
+        );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF131313),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          // context.go('/idea/${live.id}') ← wire when detail screen is ready
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top row — category tag + bookmark
+              Row(
+                children: [
+                  if (live.category != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: accent.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        live.category!,
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: accent,
+                        ),
+                      ),
+                    ),
+                  const Spacer(),
+                  _BookmarkButton(ideaId: live.id, accent: accent),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Title
+              Text(
+                live.title,
+                style: const TextStyle(
+                  fontFamily: 'Sora',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+
+              // Description
+              Text(
+                live.description,
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 13,
+                  color: Colors.white.withOpacity(0.5),
+                  height: 1.5,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 16),
+
+              // Bottom row — stage + funding badge + rocket vote
+              Row(
+                children: [
+                  if (live.stage != null) ...[
+                    Icon(Icons.circle,
+                        size: 6, color: Colors.white.withOpacity(0.25)),
+                    const SizedBox(width: 6),
+                    Text(
+                      live.stage!,
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.35),
+                      ),
+                    ),
+                  ],
+                  if (live.fundingInterest) ...[
+                    const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF59E0B).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'Funding interest',
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFF59E0B),
+                        ),
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                  _VoteButton(ideaId: live.id, accent: accent),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _FeedScreenState extends State<FeedScreen> {
+// ─── Rocket Vote Button ───────────────────────────────────────────────────────
+
+class _VoteButton extends StatefulWidget {
+  const _VoteButton({required this.ideaId, required this.accent});
+
+  final String ideaId;
+  final Color accent;
+
+  @override
+  State<_VoteButton> createState() => _VoteButtonState();
+}
+
+class _VoteButtonState extends State<_VoteButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<IdeaProvider>().fetchIdeas();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ideas = context.watch<IdeaProvider>().ideas;
-    final loading = context.watch<IdeaProvider>().loading;
-    final user = context.watch<AuthProvider>().user;
-    final role = user?.role ?? 'founder';
-    final accent = _accentForRole(role);
-
-    return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _FeedHeader(accent: accent, role: role),
-            Expanded(
-              child: loading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: accent,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : ideas.isEmpty
-                      ? _EmptyState(accent: accent)
-                      : RefreshIndicator(
-                          color: accent,
-                          backgroundColor: const Color(0xFF161616),
-                          onRefresh: () =>
-                              context.read<IdeaProvider>().fetchIdeas(),
-                          child: ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                            itemCount: ideas.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, i) => IdeaCard(
-                              idea: ideas[i],
-                              accent: accent,
-                            ),
-                          ),
-                        ),
-            ),
-          ],
-        ),
-      ),
-      // Only founders see the FAB to post an idea
-      floatingActionButton: role == 'founder'
-          ? FloatingActionButton(
-              onPressed: () {
-                // context.go('/post-idea') ← wire when screen is ready
-              },
-              backgroundColor: accent,
-              elevation: 0,
-              child: const Icon(Icons.add_rounded, color: Colors.white),
-            )
-          : null,
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.35).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
     );
   }
 
-  Color _accentForRole(String role) {
-    switch (role) {
-      case 'collaborator':
-        return const Color(0xFF10B981);
-      case 'investor':
-        return const Color(0xFFF59E0B);
-      default:
-        return const Color(0xFF6366F1);
-    }
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
   }
-}
 
-class _FeedHeader extends StatelessWidget {
-  const _FeedHeader({required this.accent, required this.role});
-
-  final Color accent;
-  final String role;
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+    if (!mounted) return;
+    final auth = context.read<AuthProvider>();
+    final currentUserId = auth.user?.id ?? '';
+    context.read<IdeaProvider>().toggleVote(widget.ideaId, currentUserId);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+    // Read live state directly from provider
+    final idea = context.watch<IdeaProvider>().ideas.firstWhere(
+          (i) => i.id == widget.ideaId,
+          orElse: () => throw StateError('Idea not found'),
+        );
+
+    return GestureDetector(
+      onTap: _onTap,
       child: Row(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'iStart',
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: -0.6,
-                  ),
-                ),
-                Text(
-                  'Explore startup ideas',
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.4),
-                  ),
-                ),
-              ],
+          ScaleTransition(
+            scale: _scale,
+            child: RocketIcon(
+              color: idea.isVoted
+                  ? widget.accent
+                  : Colors.white.withOpacity(0.35),
+              size: 18,
+              filled: idea.isVoted,
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            decoration: BoxDecoration(
-              color: accent.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              role[0].toUpperCase() + role.substring(1),
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: accent,
-              ),
+          const SizedBox(width: 5),
+          Text(
+            '${idea.voteCount}',
+            style: TextStyle(
+              fontFamily: 'DM Sans',
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: idea.isVoted
+                  ? widget.accent
+                  : Colors.white.withOpacity(0.4),
             ),
           ),
         ],
@@ -151,39 +227,124 @@ class _FeedHeader extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.accent});
+// ─── Bookmark Button ──────────────────────────────────────────────────────────
+
+class _BookmarkButton extends StatefulWidget {
+  const _BookmarkButton({required this.ideaId, required this.accent});
+
+  final String ideaId;
   final Color accent;
 
   @override
+  State<_BookmarkButton> createState() => _BookmarkButtonState();
+}
+
+class _BookmarkButtonState extends State<_BookmarkButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.3).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+    if (!mounted) return;
+    context.read<IdeaProvider>().toggleBookmark(widget.ideaId);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.lightbulb_outline_rounded,
-              size: 48, color: accent.withOpacity(0.4)),
-          const SizedBox(height: 16),
-          const Text(
-            'No ideas yet',
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Be the first to post a startup idea.',
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 14,
-              color: Colors.white.withOpacity(0.4),
-            ),
-          ),
-        ],
+    // Read live state directly from provider
+    final idea = context.watch<IdeaProvider>().ideas.firstWhere(
+          (i) => i.id == widget.ideaId,
+          orElse: () => throw StateError('Idea not found'),
+        );
+
+    return GestureDetector(
+      onTap: _onTap,
+      child: ScaleTransition(
+        scale: _scale,
+        child: _BookmarkIcon(
+          color: idea.isBookmarked
+              ? widget.accent
+              : Colors.white.withOpacity(0.35),
+          filled: idea.isBookmarked,
+          size: 20,
+        ),
       ),
     );
   }
+}
+
+// ─── Custom Bookmark Icon ─────────────────────────────────────────────────────
+
+class _BookmarkIcon extends StatelessWidget {
+  const _BookmarkIcon({
+    required this.color,
+    required this.filled,
+    this.size = 20,
+  });
+
+  final Color color;
+  final bool filled;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _BookmarkPainter(color: color, filled: filled),
+    );
+  }
+}
+
+class _BookmarkPainter extends CustomPainter {
+  _BookmarkPainter({required this.color, required this.filled});
+
+  final Color color;
+  final bool filled;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round
+      ..style = filled ? PaintingStyle.fill : PaintingStyle.stroke;
+
+    final path = Path()
+      ..moveTo(w * 0.15, 0)
+      ..lineTo(w * 0.85, 0)
+      ..lineTo(w * 0.85, h * 0.92)
+      ..lineTo(w * 0.5, h * 0.70)
+      ..lineTo(w * 0.15, h * 0.92)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_BookmarkPainter old) =>
+      old.color != color || old.filled != filled;
 }
