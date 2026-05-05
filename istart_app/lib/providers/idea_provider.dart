@@ -1,10 +1,12 @@
 // lib/providers/idea_provider.dart
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/startup_idea.dart';
 import '../services/idea_service.dart';
 
 class IdeaProvider extends ChangeNotifier {
+  static const String _bookmarkedIdeaIdsKey = 'bookmarked_idea_ids';
   final IdeaService _service = IdeaService();
 
   List<StartupIdea> _ideas = [];
@@ -88,6 +90,16 @@ class IdeaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<Set<String>> _getStoredBookmarkedIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_bookmarkedIdeaIdsKey)?.toSet() ?? <String>{};
+  }
+
+  Future<void> _saveStoredBookmarkedIds(Set<String> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_bookmarkedIdeaIdsKey, ids.toList());
+  }
+
   Future<void> fetchIdeas({
     String? category,
     String? stage,
@@ -96,11 +108,19 @@ class IdeaProvider extends ChangeNotifier {
     _setLoading(true);
     _error = null;
     try {
-      _ideas = await _service.getIdeas(
+      final storedBookmarkedIds = await _getStoredBookmarkedIds();
+      final fetchedIdeas = await _service.getIdeas(
         category: category,
         stage: stage,
         search: search,
       );
+      _ideas = fetchedIdeas
+          .map(
+            (idea) => storedBookmarkedIds.contains(idea.id) && !idea.isBookmarked
+                ? idea.copyWith(isBookmarked: true)
+                : idea,
+          )
+          .toList();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -112,7 +132,18 @@ class IdeaProvider extends ChangeNotifier {
     _setLoading(true);
     _error = null;
     try {
-      _selectedIdea = await _service.getIdeaById(id);
+      final fetched = await _service.getIdeaById(id);
+      final storedBookmarkedIds = await _getStoredBookmarkedIds();
+      final syncedIdea =
+          storedBookmarkedIds.contains(fetched.id) && !fetched.isBookmarked
+              ? fetched.copyWith(isBookmarked: true)
+              : fetched;
+      _selectedIdea = syncedIdea;
+
+      final idx = _ideas.indexWhere((idea) => idea.id == id);
+      if (idx != -1) {
+        _ideas[idx] = syncedIdea;
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -152,13 +183,27 @@ class IdeaProvider extends ChangeNotifier {
 
   Future<void> toggleBookmark(String id) async {
     try {
-      await _service.toggleBookmark(id);
+      final result = await _service.toggleBookmark(id);
+      final isBookmarked = result['bookmarked'] == true;
+      final storedBookmarkedIds = await _getStoredBookmarkedIds();
+      if (isBookmarked) {
+        storedBookmarkedIds.add(id);
+      } else {
+        storedBookmarkedIds.remove(id);
+      }
+      await _saveStoredBookmarkedIds(storedBookmarkedIds);
+
       final idx = _ideas.indexWhere((i) => i.id == id);
       if (idx != -1) {
         final current = _ideas[idx];
-        _ideas[idx] = current.copyWith(isBookmarked: !current.isBookmarked);
-        notifyListeners();
+        _ideas[idx] = current.copyWith(isBookmarked: isBookmarked);
       }
+
+      if (_selectedIdea?.id == id) {
+        _selectedIdea = _selectedIdea!.copyWith(isBookmarked: isBookmarked);
+      }
+
+      notifyListeners();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -167,17 +212,29 @@ class IdeaProvider extends ChangeNotifier {
 
   Future<void> toggleVote(String id, [String? currentUserId]) async {
     try {
-      await _service.toggleVote(id);
+      final result = await _service.toggleVote(id);
+      final isVoted = result['isVoted'] == true;
+      final voteCount = result['voteCount'] is int
+          ? result['voteCount'] as int
+          : int.tryParse('${result['voteCount']}') ?? 0;
+
       final idx = _ideas.indexWhere((i) => i.id == id);
       if (idx != -1) {
         final current = _ideas[idx];
-        final isVoted = !current.isVoted;
         _ideas[idx] = current.copyWith(
           isVoted: isVoted,
-          voteCount: isVoted ? current.voteCount + 1 : current.voteCount - 1,
+          voteCount: voteCount,
         );
-        notifyListeners();
       }
+
+      if (_selectedIdea?.id == id) {
+        _selectedIdea = _selectedIdea!.copyWith(
+          isVoted: isVoted,
+          voteCount: voteCount,
+        );
+      }
+
+      notifyListeners();
     } catch (e) {
       _error = e.toString();
       notifyListeners();

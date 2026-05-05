@@ -53,17 +53,19 @@ class IdeaService {
     await dio.delete('/ideas/$id');
   }
 
-  Future<void> toggleBookmark(String ideaId) async {
+  Future<Map<String, dynamic>> toggleBookmark(String ideaId) async {
     final dio = await ApiClient.getClient();
-    await dio.post('/ideas/$ideaId/bookmark');
+    final res = await dio.post('/ideas/$ideaId/bookmark');
+    return Map<String, dynamic>.from(res.data as Map);
   }
 
   /// POST /votes — backend checks if vote exists:
   /// - If no vote → creates it + fires notification to founder (first time only)
   /// - If vote exists → removes it (no notification on re-vote)
-  Future<void> toggleVote(String ideaId) async {
+  Future<Map<String, dynamic>> toggleVote(String ideaId) async {
     final dio = await ApiClient.getClient();
-    await dio.post('/votes', data: {'ideaId': ideaId});
+    final res = await dio.post('/votes', data: {'ideaId': ideaId});
+    return Map<String, dynamic>.from(res.data as Map);
   }
 
   /// Express funding interest in an idea (investors only)

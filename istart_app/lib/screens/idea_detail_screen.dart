@@ -643,8 +643,8 @@ class _TeamMemberCard extends StatelessWidget {
                 if (role != null || expertise != null)
                   Text(
                     [
-                      ?role,
-                      ?expertise,
+                      if (role != null) role,
+                      if (expertise != null) expertise,
                     ].where((e) => e.isNotEmpty).join(' • '),
                     style: TextStyle(
                       fontFamily: 'DM Sans',

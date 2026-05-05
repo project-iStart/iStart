@@ -14,6 +14,28 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoggedIn => _user != null;
 
   final AuthService _authService = AuthService();
+  late final Future<void> ready;
+
+  AuthProvider() {
+    ready = _restoreSession();
+  }
+
+  Future<void> _restoreSession() async {
+    final token = await _authService.getToken();
+    if (token == null || token.isEmpty) {
+      return;
+    }
+
+    try {
+      final data = await _authService.getProfile();
+      _user = UserModel.fromJson(data);
+    } catch (_) {
+      await _authService.logout();
+      _user = null;
+    } finally {
+      notifyListeners();
+    }
+  }
 
   Future<void> register({
     required String name,
@@ -32,8 +54,10 @@ class AuthProvider extends ChangeNotifier {
         role: role,
       );
       _user = UserModel.fromJson(data['user']);
+    } on AuthException catch (e) {
+      _error = e.message;
     } catch (e) {
-      _error = e.toString();
+      _error = 'Registration failed. Please try again.';
     } finally {
       _loading = false;
       notifyListeners();
@@ -47,8 +71,10 @@ class AuthProvider extends ChangeNotifier {
     try {
       final data = await _authService.login(email: email, password: password);
       _user = UserModel.fromJson(data['user']);
+    } on AuthException catch (e) {
+      _error = e.message;
     } catch (e) {
-      _error = e.toString();
+      _error = 'Login failed. Please try again.';
     } finally {
       _loading = false;
       notifyListeners();
@@ -66,7 +92,7 @@ class AuthProvider extends ChangeNotifier {
       // OR if using flutter_secure_storage:
       // await const FlutterSecureStorage().delete(key: 'token');
     } catch (e) {
-      _error = e.toString();
+      _error = 'Logout failed. Please try again.';
     } finally {
       _user = null;
       _loading = false;
@@ -91,8 +117,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      print('updateProfile error: $e');
-      _error = e.toString();
+      _error = e is AuthException ? e.message : 'Failed to update profile.';
       return false;
     }
   }
