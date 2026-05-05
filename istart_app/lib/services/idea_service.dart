@@ -2,12 +2,16 @@ import 'api_client.dart';
 import '../models/startup_idea.dart';
 
 class IdeaService {
-  Future<List<StartupIdea>> getIdeas({String? category, String? stage, String? search}) async {
+  Future<List<StartupIdea>> getIdeas({
+    String? category,
+    String? stage,
+    String? search,
+  }) async {
     final dio = await ApiClient.getClient();
     final res = await dio.get('/ideas', queryParameters: {
-      'category': ?category,
-      'stage': ?stage,
-      'search': ?search,
+      if (category != null) 'category': category,
+      if (stage != null) 'stage': stage,
+      if (search != null) 'search': search,
     });
     return (res.data as List).map((e) => StartupIdea.fromJson(e)).toList();
   }
@@ -30,10 +34,10 @@ class IdeaService {
     final res = await dio.post('/ideas', data: {
       'title': title,
       'description': description,
-      'problemStatement': ?problemStatement,
-      'category': ?category,
-      'stage': ?stage,
-      'pitchDeckUrl': ?pitchDeckUrl,
+      if (problemStatement != null) 'problemStatement': problemStatement,
+      if (category != null) 'category': category,
+      if (stage != null) 'stage': stage,
+      if (pitchDeckUrl != null) 'pitchDeckUrl': pitchDeckUrl,
     });
     return StartupIdea.fromJson(res.data);
   }
@@ -54,11 +58,5 @@ class IdeaService {
   Future<void> toggleVote(String ideaId) async {
     final dio = await ApiClient.getClient();
     await dio.post('/votes', data: {'ideaId': ideaId});
-  }
-
-  Future<Map<String, dynamic>> fundInterest(String ideaId) async {
-    final dio = await ApiClient.getClient();
-    final response = await dio.post('/ideas/$ideaId/fund-interest');
-    return Map<String, dynamic>.from(response.data as Map);
   }
 }
