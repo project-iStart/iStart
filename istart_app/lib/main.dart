@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/idea_provider.dart';
+import 'providers/discussion_provider.dart';
+import 'providers/join_request_provider.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/onboarding/role_selection_screen.dart';
 import 'screens/onboarding/register_screen.dart';
@@ -15,13 +17,10 @@ import 'screens/profile/profile_screen.dart';
 final _router = GoRouter(
   initialLocation: '/',
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (_, __) => const SplashScreen(),
-    ),
+    GoRoute(path: '/', builder: (_, _) => const SplashScreen()),
     GoRoute(
       path: '/role-selection',
-      builder: (_, __) => const RoleSelectionScreen(),
+      builder: (_, _) => const RoleSelectionScreen(),
     ),
     GoRoute(
       path: '/register',
@@ -30,14 +29,8 @@ final _router = GoRouter(
         return RegisterScreen(role: extra?['role'] ?? 'founder');
       },
     ),
-    GoRoute(
-      path: '/login',
-      builder: (_, __) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: '/home',
-      builder: (_, __) => const HomeScreen(),
-    ),
+    GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
+    GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
     GoRoute(
       path: '/profile',
       builder: (context, state) => const ProfileScreen(),
@@ -58,6 +51,8 @@ class IStartApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => IdeaProvider()),
+        ChangeNotifierProvider(create: (_) => DiscussionProvider()),
+        ChangeNotifierProvider(create: (_) => JoinRequestProvider()),
       ],
       child: MaterialApp.router(
         title: 'iStart',

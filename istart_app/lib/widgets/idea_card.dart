@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/startup_idea.dart';
-import '../../providers/idea_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../widgets/rocket_icon.dart';
+import '../models/startup_idea.dart';
+import '../providers/idea_provider.dart';
+import '../providers/auth_provider.dart';
+import '../screens/idea_detail_screen.dart';
+import 'rocket_icon.dart';
 
 class IdeaCard extends StatelessWidget {
-  const IdeaCard({
-    super.key,
-    required this.idea,
-    required this.accent,
-  });
+  const IdeaCard({super.key, required this.idea, required this.accent});
 
   final StartupIdea idea;
   final Color accent;
@@ -19,9 +16,9 @@ class IdeaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final userRole = context.watch<AuthProvider>().user?.role ?? '';
     final current = context.watch<IdeaProvider>().ideas.firstWhere(
-          (i) => i.id == idea.id,
-          orElse: () => idea,
-        );
+      (i) => i.id == idea.id,
+      orElse: () => idea,
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -32,7 +29,12 @@ class IdeaCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-          // context.go('/idea/${idea.id}') ← wire when detail screen is ready
+          // Navigate to detail screen
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => IdeaDetailScreen(ideaId: idea.id),
+            ),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(18),
@@ -45,7 +47,9 @@ class IdeaCard extends StatelessWidget {
                   if (current.category != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: accent.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(20),
@@ -101,19 +105,25 @@ class IdeaCard extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF59E0B).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                          color: const Color(0xFFF59E0B).withOpacity(0.4),
-                          width: 1),
+                        color: const Color(0xFFF59E0B).withOpacity(0.4),
+                        width: 1,
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Icon(Icons.bolt_rounded,
-                            color: Color(0xFFF59E0B), size: 13),
+                        Icon(
+                          Icons.bolt_rounded,
+                          color: Color(0xFFF59E0B),
+                          size: 13,
+                        ),
                         SizedBox(width: 4),
                         Text(
                           'Funding interest received',
@@ -132,9 +142,12 @@ class IdeaCard extends StatelessWidget {
               // Bottom row — stage + fund button + rocket vote
               Row(
                 children: [
-                  if (current.stage != null) ...[
-                    Icon(Icons.circle,
-                        size: 6, color: Colors.white.withOpacity(0.25)),
+                  if (idea.stage != null) ...[
+                    Icon(
+                      Icons.circle,
+                      size: 6,
+                      color: Colors.white.withOpacity(0.25),
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       current.stage!,
@@ -149,8 +162,28 @@ class IdeaCard extends StatelessWidget {
                   if (userRole == 'investor') ...[
                     _FundButton(idea: current),
                     const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF59E0B).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'Funding interest',
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFF59E0B),
+                        ),
+                      ),
+                    ),
                   ],
-                  _VoteButton(idea: current, accent: accent),
+                  const Spacer(),
+                  _VoteButton(idea: idea, accent: accent),
                 ],
               ),
             ],
@@ -181,7 +214,8 @@ class _FundButton extends StatelessWidget {
                 builder: (_) => AlertDialog(
                   backgroundColor: const Color(0xFF1A1A1A),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   title: const Text(
                     'Express Funding Interest',
                     style: TextStyle(
@@ -204,7 +238,9 @@ class _FundButton extends StatelessWidget {
                       child: const Text(
                         'Cancel',
                         style: TextStyle(
-                            fontFamily: 'DM Sans', color: Colors.white54),
+                          fontFamily: 'DM Sans',
+                          color: Colors.white54,
+                        ),
                       ),
                     ),
                     TextButton(
@@ -212,9 +248,10 @@ class _FundButton extends StatelessWidget {
                       child: const Text(
                         'Confirm',
                         style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            color: Color(0xFFF59E0B),
-                            fontWeight: FontWeight.w600),
+                          fontFamily: 'DM Sans',
+                          color: Color(0xFFF59E0B),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -227,22 +264,21 @@ class _FundButton extends StatelessWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content:
-                            Text('Funding interest sent to the Founder!')),
+                      content: Text('Funding interest sent to the Founder!'),
+                    ),
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               }
             },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: funded
               ? const Color(0xFFF59E0B).withOpacity(0.15)
@@ -307,9 +343,10 @@ class _VoteButtonState extends State<_VoteButton>
       vsync: this,
       duration: const Duration(milliseconds: 160),
     );
-    _scale = Tween<double>(begin: 1.0, end: 1.35).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.35,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -385,9 +422,10 @@ class _BookmarkButtonState extends State<_BookmarkButton>
       vsync: this,
       duration: const Duration(milliseconds: 160),
     );
-    _scale = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override

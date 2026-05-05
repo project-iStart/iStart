@@ -26,13 +26,6 @@ class AuthService {
         'email': email,
         'password': password,
         'role': role,
-<<<<<<< Updated upstream
-        if (bio != null) 'bio': bio,
-      },
-    );
-    await _saveToken(res.data['token']);
-    return res.data;
-=======
       };
       if (bio != null && bio.isNotEmpty) {
         data['bio'] = bio;
@@ -46,7 +39,6 @@ class AuthService {
     } catch (_) {
       throw AuthException('Registration failed. Please try again.');
     }
->>>>>>> Stashed changes
   }
 
   Future<Map<String, dynamic>> login({

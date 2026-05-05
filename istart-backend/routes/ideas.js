@@ -195,11 +195,10 @@ router.post('/:id/fund-interest', auth, async (req, res) => {
     await idea.save();
 
     await Notification.create({
-      recipient: idea.founder,
+      user: idea.founder,
       type: 'fund_interest',
       message: `An investor expressed funding interest in your idea "${idea.title}"`,
       triggeredBy: req.user.id,
-      idea: idea._id,
     });
 
     res.json({
