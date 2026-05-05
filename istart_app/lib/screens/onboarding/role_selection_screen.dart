@@ -92,7 +92,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 Expanded(
                   child: ListView.separated(
                     itemCount: _roles.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    separatorBuilder: (_, _) => const SizedBox(height: 16),
                     itemBuilder: (context, i) {
                       final role = _roles[i];
                       final selected = _selectedKey == role.key;

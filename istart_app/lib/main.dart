@@ -17,11 +17,11 @@ final _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (_, __) => const SplashScreen(),
+      builder: (_, _) => const SplashScreen(),
     ),
     GoRoute(
       path: '/role-selection',
-      builder: (_, __) => const RoleSelectionScreen(),
+      builder: (_, _) => const RoleSelectionScreen(),
     ),
     GoRoute(
       path: '/register',
@@ -32,11 +32,11 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/login',
-      builder: (_, __) => const LoginScreen(),
+      builder: (_, _) => const LoginScreen(),
     ),
     GoRoute(
       path: '/home',
-      builder: (_, __) => const HomeScreen(),
+      builder: (_, _) => const HomeScreen(),
     ),
     GoRoute(
       path: '/profile',

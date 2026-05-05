@@ -5,9 +5,9 @@ class IdeaService {
   Future<List<StartupIdea>> getIdeas({String? category, String? stage, String? search}) async {
     final dio = await ApiClient.getClient();
     final res = await dio.get('/ideas', queryParameters: {
-      if (category != null) 'category': category,
-      if (stage != null) 'stage': stage,
-      if (search != null) 'search': search,
+      'category': ?category,
+      'stage': ?stage,
+      'search': ?search,
     });
     return (res.data as List).map((e) => StartupIdea.fromJson(e)).toList();
   }
@@ -30,10 +30,10 @@ class IdeaService {
     final res = await dio.post('/ideas', data: {
       'title': title,
       'description': description,
-      if (problemStatement != null) 'problemStatement': problemStatement,
-      if (category != null) 'category': category,
-      if (stage != null) 'stage': stage,
-      if (pitchDeckUrl != null) 'pitchDeckUrl': pitchDeckUrl,
+      'problemStatement': ?problemStatement,
+      'category': ?category,
+      'stage': ?stage,
+      'pitchDeckUrl': ?pitchDeckUrl,
     });
     return StartupIdea.fromJson(res.data);
   }
