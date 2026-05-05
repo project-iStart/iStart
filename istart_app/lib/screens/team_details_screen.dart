@@ -220,42 +220,57 @@ class _DiscussionsTabState extends State<_DiscussionsTab> {
             ),
           ),
           ElevatedButton(
-            onPressed: () async {
-              if (_threadTitleController.text.trim().isEmpty) return;
-              Navigator.pop(context);
+            onPressed: _isCreating
+                ? null
+                : () async {
+                    if (_threadTitleController.text.trim().isEmpty) return;
 
-              setState(() => _isCreating = true);
-              final success = await context
-                  .read<DiscussionProvider>()
-                  .createThread(
-                    ideaId: widget.ideaId,
-                    title: _threadTitleController.text.trim(),
-                  );
-              if (!mounted) return;
-              setState(() => _isCreating = false);
+                    setState(() => _isCreating = true);
+                    final success = await context
+                        .read<DiscussionProvider>()
+                        .createThread(
+                          ideaId: widget.ideaId,
+                          title: _threadTitleController.text.trim(),
+                        );
+                    if (!mounted) return;
+                    setState(() => _isCreating = false);
 
-              _threadTitleController.clear();
-              if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Discussion created!'),
-                    backgroundColor: widget.accent,
-                  ),
-                );
-              }
-            },
+                    _threadTitleController.clear();
+                    if (mounted) Navigator.pop(context);
+
+                    if (success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Discussion created!'),
+                          backgroundColor: widget.accent,
+                        ),
+                      );
+                    }
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: widget.accent,
+              disabledBackgroundColor: widget.accent.withOpacity(0.5),
               elevation: 0,
             ),
-            child: const Text(
-              'Create',
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
+            child: _isCreating
+                ? SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                  )
+                : const Text(
+                    'Create',
+                    style: TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ],
       ),

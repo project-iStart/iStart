@@ -17,7 +17,6 @@ class JoinRequestScreen extends StatefulWidget {
 
 class _JoinRequestScreenState extends State<JoinRequestScreen> {
   late TextEditingController _messageController;
-  final bool _isSubmitting = false;
 
   @override
   void initState() {
