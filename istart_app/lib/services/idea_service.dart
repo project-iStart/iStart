@@ -8,11 +8,14 @@ class IdeaService {
     String? search,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.get('/ideas', queryParameters: {
-      if (category != null) 'category': category,
-      if (stage != null) 'stage': stage,
-      if (search != null) 'search': search,
-    });
+    final res = await dio.get(
+      '/ideas',
+      queryParameters: {
+        if (category != null) 'category': category,
+        if (stage != null) 'stage': stage,
+        if (search != null) 'search': search,
+      },
+    );
     return (res.data as List).map((e) => StartupIdea.fromJson(e)).toList();
   }
 
@@ -31,14 +34,17 @@ class IdeaService {
     String? pitchDeckUrl,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post('/ideas', data: {
-      'title': title,
-      'description': description,
-      if (problemStatement != null) 'problemStatement': problemStatement,
-      if (category != null) 'category': category,
-      if (stage != null) 'stage': stage,
-      if (pitchDeckUrl != null) 'pitchDeckUrl': pitchDeckUrl,
-    });
+    final res = await dio.post(
+      '/ideas',
+      data: {
+        'title': title,
+        'description': description,
+        if (problemStatement != null) 'problemStatement': problemStatement,
+        if (category != null) 'category': category,
+        if (stage != null) 'stage': stage,
+        if (pitchDeckUrl != null) 'pitchDeckUrl': pitchDeckUrl,
+      },
+    );
     return StartupIdea.fromJson(res.data);
   }
 
@@ -58,5 +64,12 @@ class IdeaService {
   Future<void> toggleVote(String ideaId) async {
     final dio = await ApiClient.getClient();
     await dio.post('/votes', data: {'ideaId': ideaId});
+  }
+
+  /// Express funding interest in an idea (investors only)
+  Future<Map<String, dynamic>> fundInterest(String ideaId) async {
+    final dio = await ApiClient.getClient();
+    final res = await dio.post('/ideas/$ideaId/fund-interest');
+    return res.data as Map<String, dynamic>;
   }
 }
