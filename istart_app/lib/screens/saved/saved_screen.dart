@@ -15,11 +15,20 @@ class _SavedScreenState extends State<SavedScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch ideas if not already loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<IdeaProvider>();
-      if (provider.ideas.isEmpty) provider.fetchIdeas();
+      _loadIdeasIfNeeded();
     });
+  }
+
+  Future<void> _loadIdeasIfNeeded() async {
+    final auth = context.read<AuthProvider>();
+    await auth.ready;
+    if (!mounted) return;
+
+    final provider = context.read<IdeaProvider>();
+    if (provider.allIdeas.isEmpty) {
+      await provider.fetchIdeas();
+    }
   }
 
   Color _accentForRole(String role) {

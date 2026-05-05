@@ -1,0 +1,136 @@
+===== BACKEND =====
+Folder PATH listing
+Volume serial number is F677-AA83
+D:\UNIVERSITY\CSE470\PROJECT\ISTART\ISTART-BACKEND\CONFIG
+    db.js
+    
+No subfolders exist 
+
+Folder PATH listing
+Volume serial number is F677-AA83
+D:\UNIVERSITY\CSE470\PROJECT\ISTART\ISTART-BACKEND\MIDDLEWARE
+    auth.js
+    optionalAuth.js
+    
+No subfolders exist 
+
+Folder PATH listing
+Volume serial number is F677-AA83
+D:\UNIVERSITY\CSE470\PROJECT\ISTART\ISTART-BACKEND\MODELS
+    DiscussionThread.js
+    DocRequest.js
+    Feedback.js
+    JoinRequest.js
+    Message.js
+    Notification.js
+    StartupIdea.js
+    User.js
+    Vote.js
+    
+No subfolders exist 
+
+Folder PATH listing
+Volume serial number is F677-AA83
+D:\UNIVERSITY\CSE470\PROJECT\ISTART\ISTART-BACKEND\ROUTES
+    auth.js
+    discussion.js
+    docRequests.js
+    feedback.js
+    ideas.js
+    joinRequests.js
+    notifications.js
+    votes.js
+    
+No subfolders exist 
+
+package.json
+package-lock.json
+
+===== FLUTTER APP =====
+Folder PATH listing
+Volume serial number is F677-AA83
+D:\UNIVERSITY\CSE470\PROJECT\ISTART\ISTART_APP\LIB
+|   main.dart
+|   
++---config
+|       api_config.dart
+|       
++---models
+|       app_notification.dart
+|       discussion_thread.dart
+|       doc_request.dart
+|       feedback.dart
+|       join_request.dart
+|       message.dart
+|       notification_model.dart
+|       startup_idea.dart
+|       user.dart
+|       user_model.dart
+|       vote.dart
+|       
++---providers
+|       auth_provider.dart
+|       discussion_provider.dart
+|       idea_provider.dart
+|       join_request_provider.dart
+|       
++---screens
+|   |   discussion_thread_screen.dart
+|   |   idea_detail_screen.dart
+|   |   join_request_management_screen.dart
+|   |   join_request_screen.dart
+|   |   team_details_screen.dart
+|   |   
+|   +---feed
+|   |       feed_screen.dart
+|   |       
+|   +---home
+|   |       home_screen.dart
+|   |       
+|   +---notifications
+|   |       notification_screen.dart
+|   |       
+|   +---onboarding
+|   |       login_screen.dart
+|   |       register_screen.dart
+|   |       role_selection_screen.dart
+|   |       
+|   +---profile
+|   |       profile_screen.dart
+|   |       
+|   +---saved
+|   |       saved_screen.dart
+|   |       
+|   \---splash
+|           splash_screen.dart
+|           
++---services
+|       api_client.dart
+|       auth_service.dart
+|       discussion_service.dart
+|       doc_request_service.dart
+|       feedback_service.dart
+|       idea_service.dart
+|       join_request_service.dart
+|       notification_services.dart
+|       vote_service.dart
+|       
+\---widgets
+        idea_card.dart
+        rocket_icon.dart
+        
+Folder PATH listing
+Volume serial number is F677-AA83
+D:\UNIVERSITY\CSE470\PROJECT\ISTART\ISTART_APP\ASSETS
++---fonts
+|       DMSans-Medium.ttf
+|       DMSans-Regular.ttf
+|       DMSans-SemiBold.ttf
+|       Sora-Bold.ttf
+|       Sora-Regular.ttf
+|       Sora-SemiBold.ttf
+|       
+\---icon
+        icon.png
+        
+pubspec.yaml

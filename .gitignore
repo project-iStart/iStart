@@ -22,3 +22,5 @@ windows/flutter/ephemeral/
 # Misc
 *.log
 *.tmp
+struc1.txt
+.gitignore

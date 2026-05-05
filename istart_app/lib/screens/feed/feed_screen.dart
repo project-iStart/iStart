@@ -38,8 +38,15 @@ class _FeedScreenState extends State<FeedScreen> {
     super.initState();
     _searchController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<IdeaProvider>().fetchIdeas();
+      _loadIdeas();
     });
+  }
+
+  Future<void> _loadIdeas() async {
+    final auth = context.read<AuthProvider>();
+    await auth.ready;
+    if (!mounted) return;
+    await context.read<IdeaProvider>().fetchIdeas();
   }
 
   @override
@@ -87,8 +94,7 @@ class _FeedScreenState extends State<FeedScreen> {
                       : RefreshIndicator(
                           color: accent,
                           backgroundColor: const Color(0xFF161616),
-                          onRefresh: () =>
-                              context.read<IdeaProvider>().fetchIdeas(),
+                          onRefresh: _loadIdeas,
                           child: ListView.separated(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                             itemCount: ideas.length,
