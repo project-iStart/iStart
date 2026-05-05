@@ -40,7 +40,13 @@ class IdeaProvider extends ChangeNotifier {
     _setLoading(true);
     _error = null;
     try {
-      _selectedIdea = await _service.getIdeaById(id);
+      final fetched = await _service.getIdeaById(id);
+      _selectedIdea = fetched;
+
+      final idx = _ideas.indexWhere((idea) => idea.id == id);
+      if (idx != -1) {
+        _ideas[idx] = fetched;
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -79,13 +85,19 @@ class IdeaProvider extends ChangeNotifier {
 
   Future<void> toggleBookmark(String id) async {
     try {
-      await _service.toggleBookmark(id);
+      final result = await _service.toggleBookmark(id);
+      final isBookmarked = result['bookmarked'] == true;
       final idx = _ideas.indexWhere((i) => i.id == id);
       if (idx != -1) {
         final current = _ideas[idx];
-        _ideas[idx] = current.copyWith(isBookmarked: !current.isBookmarked);
-        notifyListeners();
+        _ideas[idx] = current.copyWith(isBookmarked: isBookmarked);
       }
+
+      if (_selectedIdea?.id == id) {
+        _selectedIdea = _selectedIdea!.copyWith(isBookmarked: isBookmarked);
+      }
+
+      notifyListeners();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -94,17 +106,29 @@ class IdeaProvider extends ChangeNotifier {
 
   Future<void> toggleVote(String id, [String? currentUserId]) async {
     try {
-      await _service.toggleVote(id);
+      final result = await _service.toggleVote(id);
+      final isVoted = result['isVoted'] == true;
+      final voteCount = result['voteCount'] is int
+          ? result['voteCount'] as int
+          : int.tryParse('${result['voteCount']}') ?? 0;
+
       final idx = _ideas.indexWhere((i) => i.id == id);
       if (idx != -1) {
         final current = _ideas[idx];
-        final isVoted = !current.isVoted;
         _ideas[idx] = current.copyWith(
           isVoted: isVoted,
-          voteCount: isVoted ? current.voteCount + 1 : current.voteCount - 1,
+          voteCount: voteCount,
         );
-        notifyListeners();
       }
+
+      if (_selectedIdea?.id == id) {
+        _selectedIdea = _selectedIdea!.copyWith(
+          isVoted: isVoted,
+          voteCount: voteCount,
+        );
+      }
+
+      notifyListeners();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
