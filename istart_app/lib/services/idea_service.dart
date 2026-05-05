@@ -55,4 +55,10 @@ class IdeaService {
     final dio = await ApiClient.getClient();
     await dio.post('/votes', data: {'ideaId': ideaId});
   }
+
+  Future<Map<String, dynamic>> fundInterest(String ideaId) async {
+    final dio = await ApiClient.getClient();
+    final response = await dio.post('/ideas/$ideaId/fund-interest');
+    return Map<String, dynamic>.from(response.data as Map);
+  }
 }

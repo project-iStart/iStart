@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/startup_idea.dart';
-import '../providers/idea_provider.dart';
-import '../providers/auth_provider.dart';
-import 'rocket_icon.dart';
+import '../../models/startup_idea.dart';
+import '../../providers/idea_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../widgets/rocket_icon.dart';
 
 class IdeaCard extends StatelessWidget {
   const IdeaCard({
@@ -17,6 +17,12 @@ class IdeaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userRole = context.watch<AuthProvider>().user?.role ?? '';
+    final current = context.watch<IdeaProvider>().ideas.firstWhere(
+          (i) => i.id == idea.id,
+          orElse: () => idea,
+        );
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF131313),
@@ -36,7 +42,7 @@ class IdeaCard extends StatelessWidget {
               // Top row — category tag + bookmark
               Row(
                 children: [
-                  if (idea.category != null)
+                  if (current.category != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
@@ -45,7 +51,7 @@ class IdeaCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        idea.category!,
+                        current.category!,
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 11,
@@ -55,14 +61,14 @@ class IdeaCard extends StatelessWidget {
                       ),
                     ),
                   const Spacer(),
-                  _BookmarkButton(idea: idea, accent: accent),
+                  _BookmarkButton(idea: current, accent: accent),
                 ],
               ),
               const SizedBox(height: 12),
 
               // Title
               Text(
-                idea.title,
+                current.title,
                 style: const TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 16,
@@ -77,7 +83,7 @@ class IdeaCard extends StatelessWidget {
 
               // Description
               Text(
-                idea.description,
+                current.description,
                 style: TextStyle(
                   fontFamily: 'DM Sans',
                   fontSize: 13,
@@ -89,15 +95,49 @@ class IdeaCard extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Bottom row — stage + funding badge + rocket vote
+              // Funding interest badge
+              if (current.fundingInterestCount > 0 || current.fundingInterest)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                          color: const Color(0xFFF59E0B).withOpacity(0.4),
+                          width: 1),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.bolt_rounded,
+                            color: Color(0xFFF59E0B), size: 13),
+                        SizedBox(width: 4),
+                        Text(
+                          'Funding interest received',
+                          style: TextStyle(
+                            fontFamily: 'DM Sans',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFFF59E0B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // Bottom row — stage + fund button + rocket vote
               Row(
                 children: [
-                  if (idea.stage != null) ...[
+                  if (current.stage != null) ...[
                     Icon(Icons.circle,
                         size: 6, color: Colors.white.withOpacity(0.25)),
                     const SizedBox(width: 6),
                     Text(
-                      idea.stage!,
+                      current.stage!,
                       style: TextStyle(
                         fontFamily: 'DM Sans',
                         fontSize: 12,
@@ -105,32 +145,138 @@ class IdeaCard extends StatelessWidget {
                       ),
                     ),
                   ],
-                  if (idea.fundingInterest) ...[
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF59E0B).withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'Funding interest',
-                        style: TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFFF59E0B),
-                        ),
-                      ),
-                    ),
-                  ],
                   const Spacer(),
-                  _VoteButton(idea: idea, accent: accent),
+                  if (userRole == 'investor') ...[
+                    _FundButton(idea: current),
+                    const SizedBox(width: 10),
+                  ],
+                  _VoteButton(idea: current, accent: accent),
                 ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Fund Button ──────────────────────────────────────────────────────────────
+
+class _FundButton extends StatelessWidget {
+  const _FundButton({required this.idea});
+
+  final StartupIdea idea;
+
+  @override
+  Widget build(BuildContext context) {
+    final funded = idea.hasFundingInterest;
+
+    return GestureDetector(
+      onTap: funded
+          ? null
+          : () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (_) => AlertDialog(
+                  backgroundColor: const Color(0xFF1A1A1A),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  title: const Text(
+                    'Express Funding Interest',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                  content: const Text(
+                    'Your contact details will be shared with the Founder. The actual deal happens outside the platform.',
+                    style: TextStyle(
+                      fontFamily: 'DM Sans',
+                      color: Colors.white70,
+                      fontSize: 13,
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                            fontFamily: 'DM Sans', color: Colors.white54),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text(
+                        'Confirm',
+                        style: TextStyle(
+                            fontFamily: 'DM Sans',
+                            color: Color(0xFFF59E0B),
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm != true) return;
+              try {
+                await context.read<IdeaProvider>().fundInterest(idea.id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text('Funding interest sent to the Founder!')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
+              }
+            },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: funded
+              ? const Color(0xFFF59E0B).withOpacity(0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: funded
+                ? const Color(0xFFF59E0B)
+                : Colors.white.withOpacity(0.2),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              funded ? Icons.bolt_rounded : Icons.bolt_outlined,
+              color: funded
+                  ? const Color(0xFFF59E0B)
+                  : Colors.white.withOpacity(0.4),
+              size: 15,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              funded ? 'Interested' : 'Fund This',
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: funded
+                    ? const Color(0xFFF59E0B)
+                    : Colors.white.withOpacity(0.4),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -175,7 +321,6 @@ class _VoteButtonState extends State<_VoteButton>
   Future<void> _onTap() async {
     await _ctrl.forward();
     await _ctrl.reverse();
-
     if (!mounted) return;
     final auth = context.read<AuthProvider>();
     final currentUserId = auth.user?.id ?? '';
@@ -314,7 +459,6 @@ class _BookmarkPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = filled ? PaintingStyle.fill : PaintingStyle.stroke;
 
-    // Classic ribbon bookmark shape with a V-notch at the bottom
     final path = Path()
       ..moveTo(w * 0.15, 0)
       ..lineTo(w * 0.85, 0)

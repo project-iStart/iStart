@@ -13,6 +13,8 @@ class StartupIdea {
   final bool isBookmarked;
   final bool isVoted;
   final int voteCount;
+  final bool hasFundingInterest;
+  final int fundingInterestCount;
 
   StartupIdea({
     required this.id,
@@ -29,6 +31,8 @@ class StartupIdea {
     this.isBookmarked = false,
     this.isVoted = false,
     this.voteCount = 0,
+    this.hasFundingInterest = false,
+    this.fundingInterestCount = 0,
   });
 
   factory StartupIdea.fromJson(Map<String, dynamic> json) => StartupIdea(
@@ -46,12 +50,16 @@ class StartupIdea {
         isBookmarked: json['isBookmarked'] ?? false,
         isVoted: json['isVoted'] ?? false,
         voteCount: json['voteCount'] ?? 0,
+        hasFundingInterest: json['hasFundingInterest'] ?? false,
+        fundingInterestCount: json['fundingInterestCount'] ?? 0,
       );
 
   StartupIdea copyWith({
     bool? isBookmarked,
     bool? isVoted,
     int? voteCount,
+    bool? hasFundingInterest,
+    int? fundingInterestCount,
   }) =>
       StartupIdea(
         id: id,
@@ -68,5 +76,7 @@ class StartupIdea {
         isBookmarked: isBookmarked ?? this.isBookmarked,
         isVoted: isVoted ?? this.isVoted,
         voteCount: voteCount ?? this.voteCount,
+        hasFundingInterest: hasFundingInterest ?? this.hasFundingInterest,
+        fundingInterestCount: fundingInterestCount ?? this.fundingInterestCount,
       );
 }

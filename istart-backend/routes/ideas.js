@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const optionalAuth = require('../middleware/optionalAuth');
 const StartupIdea = require('../models/StartupIdea');
 const Vote = require('../models/Vote');
+const Notification = require('../models/Notification');
 
 // GET /api/ideas — browse all ideas
 router.get('/', optionalAuth, async (req, res) => {
@@ -20,6 +21,7 @@ router.get('/', optionalAuth, async (req, res) => {
 
     let votedSet = new Set();
     let bookmarkedSet = new Set();
+    let fundedSet = new Set();
 
     if (req.user) {
       const userId = req.user.id;
@@ -35,9 +37,16 @@ router.get('/', optionalAuth, async (req, res) => {
           .filter(i => i.bookmarkedBy.map(b => b.toString()).includes(userId))
           .map(i => i._id.toString())
       );
+
+      fundedSet = new Set(
+        ideas
+          .filter(i =>
+            i.fundingInterests?.some(f => f.investor.toString() === userId)
+          )
+          .map(i => i._id.toString())
+      );
     }
 
-    // Compute voteCount per idea via aggregation
     const ideaIds = ideas.map(i => i._id);
     const voteCounts = await Vote.aggregate([
       { $match: { startupIdea: { $in: ideaIds } } },
@@ -51,6 +60,8 @@ router.get('/', optionalAuth, async (req, res) => {
       voteCount: voteCountMap[idea._id.toString()] ?? 0,
       isVoted: votedSet.has(idea._id.toString()),
       isBookmarked: bookmarkedSet.has(idea._id.toString()),
+      fundingInterestCount: idea.fundingInterests?.length ?? 0,
+      hasFundingInterest: fundedSet.has(idea._id.toString()),
     }));
 
     res.json(result);
@@ -70,11 +81,15 @@ router.get('/:id', optionalAuth, async (req, res) => {
 
     let isVoted = false;
     let isBookmarked = false;
+    let hasFundingInterest = false;
 
     if (req.user) {
       const vote = await Vote.findOne({ user: req.user.id, startupIdea: idea._id });
       isVoted = !!vote;
       isBookmarked = idea.bookmarkedBy.map(b => b.toString()).includes(req.user.id);
+      hasFundingInterest = idea.fundingInterests?.some(
+        f => f.investor.toString() === req.user.id
+      ) ?? false;
     }
 
     const voteCount = await Vote.countDocuments({ startupIdea: idea._id });
@@ -84,6 +99,8 @@ router.get('/:id', optionalAuth, async (req, res) => {
       voteCount,
       isVoted,
       isBookmarked,
+      fundingInterestCount: idea.fundingInterests?.length ?? 0,
+      hasFundingInterest,
     });
   } catch (err) {
     console.error(err);
@@ -156,6 +173,42 @@ router.post('/:id/bookmark', auth, async (req, res) => {
     res.json({ bookmarked: index === -1 });
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// POST /api/ideas/:id/fund-interest — Investor only
+router.post('/:id/fund-interest', auth, async (req, res) => {
+  try {
+    const idea = await StartupIdea.findById(req.params.id);
+    if (!idea) return res.status(404).json({ msg: 'Idea not found' });
+
+    if (req.user.role !== 'investor')
+      return res.status(403).json({ msg: 'Only investors can express funding interest' });
+
+    const alreadyExpressed = idea.fundingInterests?.some(
+      f => f.investor.toString() === req.user.id
+    );
+    if (alreadyExpressed)
+      return res.status(400).json({ msg: 'Already expressed interest' });
+
+    idea.fundingInterests.push({ investor: req.user.id });
+    await idea.save();
+
+    await Notification.create({
+      user: idea.founder,
+      type: 'fund_interest',
+      message: `An investor expressed funding interest in your idea "${idea.title}"`,
+      triggeredBy: req.user.id,
+    });
+
+    res.json({
+      message: 'Funding interest expressed successfully',
+      fundingInterestCount: idea.fundingInterests.length,
+      hasFundingInterest: true,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: err.message });
   }
 });
 
