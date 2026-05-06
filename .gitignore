@@ -24,3 +24,6 @@ windows/flutter/ephemeral/
 *.tmp
 struc1.txt
 .gitignore
+istart_app_lib_tree.txt
+full-tree.txt
+clean-tree.txt

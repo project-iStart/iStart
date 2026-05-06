@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/startup_idea.dart';
 import '../providers/join_request_provider.dart';
 import '../providers/auth_provider.dart';
+import 'profile/public_profile_screen.dart';
 
 class JoinRequestManagementScreen extends StatefulWidget {
   final StartupIdea idea;
@@ -42,7 +43,6 @@ class _JoinRequestManagementScreenState
         body: SafeArea(
           child: Column(
             children: [
-              // Header
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -68,7 +68,7 @@ class _JoinRequestManagementScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Join Requests',
                             style: TextStyle(
                               fontFamily: 'Sora',
@@ -93,8 +93,6 @@ class _JoinRequestManagementScreenState
                   ],
                 ),
               ),
-
-              // Tabs
               TabBar(
                 labelColor: accent,
                 unselectedLabelColor: Colors.white.withOpacity(0.5),
@@ -109,53 +107,44 @@ class _JoinRequestManagementScreenState
                   Tab(text: 'Approved (${approvedRequests.length})'),
                 ],
               ),
-
-              // Tab content
               Expanded(
                 child: TabBarView(
                   children: [
-                    // Pending tab
                     loading
                         ? Center(
                             child: CircularProgressIndicator(
-                              color: accent,
-                              strokeWidth: 2,
-                            ),
-                          )
+                                color: accent, strokeWidth: 2))
                         : pendingRequests.isEmpty
-                        ? _EmptyState(
-                            accent: accent,
-                            message: 'No pending requests',
-                          )
-                        : RefreshIndicator(
-                            color: accent,
-                            backgroundColor: const Color(0xFF161616),
-                            onRefresh: () => context
-                                .read<JoinRequestProvider>()
-                                .fetchRequestsForIdea(widget.idea.id),
-                            child: ListView.separated(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: pendingRequests.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(height: 12),
-                              itemBuilder: (context, i) => _JoinRequestCard(
-                                request: pendingRequests[i],
+                            ? _EmptyState(
                                 accent: accent,
-                                isPending: true,
+                                message: 'No pending requests')
+                            : RefreshIndicator(
+                                color: accent,
+                                backgroundColor: const Color(0xFF161616),
+                                onRefresh: () => context
+                                    .read<JoinRequestProvider>()
+                                    .fetchRequestsForIdea(widget.idea.id),
+                                child: ListView.separated(
+                                  padding: const EdgeInsets.all(16),
+                                  itemCount: pendingRequests.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 12),
+                                  itemBuilder: (context, i) =>
+                                      _JoinRequestCard(
+                                    request: pendingRequests[i],
+                                    accent: accent,
+                                    isPending: true,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-
-                    // Approved tab
                     approvedRequests.isEmpty
                         ? _EmptyState(
                             accent: accent,
-                            message: 'No approved collaborators yet',
-                          )
+                            message: 'No approved collaborators yet')
                         : ListView.separated(
                             padding: const EdgeInsets.all(16),
                             itemCount: approvedRequests.length,
-                            separatorBuilder: (_, _) =>
+                            separatorBuilder: (_, __) =>
                                 const SizedBox(height: 12),
                             itemBuilder: (context, i) => _JoinRequestCard(
                               request: approvedRequests[i],
@@ -207,42 +196,44 @@ class _JoinRequestCardState extends State<_JoinRequestCard> {
 
   Future<void> _handleApprove() async {
     setState(() => _isProcessing = true);
-    final success = await context.read<JoinRequestProvider>().approveRequest(
-      widget.request.id,
-    );
+    final success = await context
+        .read<JoinRequestProvider>()
+        .approveRequest(widget.request.id);
     if (!mounted) return;
     setState(() => _isProcessing = false);
-
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Request approved!'),
-          backgroundColor: widget.accent,
-        ),
+            content: const Text('Request approved!'),
+            backgroundColor: widget.accent),
       );
     }
   }
 
   Future<void> _handleReject() async {
     setState(() => _isProcessing = true);
-    final success = await context.read<JoinRequestProvider>().rejectRequest(
-      widget.request.id,
-    );
+    final success = await context
+        .read<JoinRequestProvider>()
+        .rejectRequest(widget.request.id);
     if (!mounted) return;
     setState(() => _isProcessing = false);
-
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Request rejected'),
-          backgroundColor: Colors.red.withOpacity(0.8),
-        ),
+            content: const Text('Request rejected'),
+            backgroundColor: Colors.red.withOpacity(0.8)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // collaboratorId may come as request.collaboratorId or nested object
+    final collaboratorId =
+        (widget.request.collaboratorId ?? '') as String;
+    final collaboratorName =
+        (widget.request.collaboratorName ?? '') as String;
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF161616),
@@ -254,82 +245,93 @@ class _JoinRequestCardState extends State<_JoinRequestCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with name and status
-            Row(
-              children: [
-                // Avatar
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: widget.accent.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      widget.request.collaboratorName.isNotEmpty
-                          ? widget.request.collaboratorName[0].toUpperCase()
-                          : '?',
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: widget.accent,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.request.collaboratorName,
-                        style: const TextStyle(
-                          fontFamily: 'Sora',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+            // Tappable header row
+            GestureDetector(
+              onTap: collaboratorId.isEmpty
+                  ? null
+                  : () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => PublicProfileScreen(
+                            userId: collaboratorId,
+                            userName: collaboratorName,
+                          ),
                         ),
-                      ),
-                      Text(
-                        widget.request.collaboratorEmail,
+                      );
+                    },
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: widget.accent.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        collaboratorName.isNotEmpty
+                            ? collaboratorName[0].toUpperCase()
+                            : '?',
                         style: TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.5),
+                          fontFamily: 'Sora',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: widget.accent,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: widget.isPending
-                        ? Colors.amber.withOpacity(0.12)
-                        : widget.accent.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    widget.isPending ? 'Pending' : 'Approved',
-                    style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: widget.isPending ? Colors.amber : widget.accent,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          collaboratorName,
+                          style: const TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          widget.request.collaboratorEmail ?? '',
+                          style: TextStyle(
+                            fontFamily: 'DM Sans',
+                            fontSize: 12,
+                            color: Colors.white.withOpacity(0.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: widget.isPending
+                          ? Colors.amber.withOpacity(0.12)
+                          : widget.accent.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      widget.isPending ? 'Pending' : 'Approved',
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: widget.isPending
+                            ? Colors.amber
+                            : widget.accent,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
-
-            // Message
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -337,7 +339,7 @@ class _JoinRequestCardState extends State<_JoinRequestCard> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                widget.request.message,
+                widget.request.message ?? '',
                 style: TextStyle(
                   fontFamily: 'DM Sans',
                   fontSize: 13,
@@ -347,8 +349,6 @@ class _JoinRequestCardState extends State<_JoinRequestCard> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Submitted date
             Text(
               'Submitted ${_formatDate(widget.request.createdAt)}',
               style: TextStyle(
@@ -357,8 +357,6 @@ class _JoinRequestCardState extends State<_JoinRequestCard> {
                 color: Colors.white.withOpacity(0.4),
               ),
             ),
-
-            // Action buttons (only show if pending)
             if (widget.isPending) ...[
               const SizedBox(height: 16),
               Row(
@@ -368,13 +366,10 @@ class _JoinRequestCardState extends State<_JoinRequestCard> {
                       onPressed: _isProcessing ? null : _handleReject,
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
-                          color: Colors.red.withOpacity(0.5),
-                          width: 1,
-                        ),
+                            color: Colors.red.withOpacity(0.5), width: 1),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                       child: const Text(
                         'Reject',
@@ -393,11 +388,11 @@ class _JoinRequestCardState extends State<_JoinRequestCard> {
                       onPressed: _isProcessing ? null : _handleApprove,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: widget.accent,
-                        disabledBackgroundColor: widget.accent.withOpacity(0.5),
+                        disabledBackgroundColor:
+                            widget.accent.withOpacity(0.5),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                            borderRadius: BorderRadius.circular(8)),
                         elevation: 0,
                       ),
                       child: _isProcessing
@@ -407,8 +402,7 @@ class _JoinRequestCardState extends State<_JoinRequestCard> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white.withOpacity(0.8),
-                                ),
+                                    Colors.white.withOpacity(0.8)),
                               ),
                             )
                           : const Text(
@@ -434,16 +428,10 @@ class _JoinRequestCardState extends State<_JoinRequestCard> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-
-    if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else {
-      return '${date.month}/${date.day}/${date.year}';
-    }
+    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+    if (difference.inHours < 24) return '${difference.inHours}h ago';
+    if (difference.inDays < 7) return '${difference.inDays}d ago';
+    return '${date.month}/${date.day}/${date.year}';
   }
 }
 
@@ -461,7 +449,8 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.inbox_outlined, size: 48, color: accent.withOpacity(0.4)),
+          Icon(Icons.inbox_outlined,
+              size: 48, color: accent.withOpacity(0.4)),
           const SizedBox(height: 16),
           Text(
             message,

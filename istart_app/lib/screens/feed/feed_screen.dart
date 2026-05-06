@@ -18,7 +18,12 @@ class _FeedScreenState extends State<FeedScreen> {
   late TextEditingController _searchController;
 
   final List<String> _categories = [
-    'Tech', 'Health', 'Finance', 'Education', 'Social', 'Other',
+    'Tech',
+    'Health',
+    'Finance',
+    'Education',
+    'Social',
+    'Other',
   ];
 
   final List<String> _stages = ['Idea', 'MVP', 'Growth', 'Scaling'];
@@ -87,22 +92,19 @@ class _FeedScreenState extends State<FeedScreen> {
                       ),
                     )
                   : ideas.isEmpty
-                      ? _EmptyState(accent: accent)
-                      : RefreshIndicator(
-                          color: accent,
-                          backgroundColor: const Color(0xFF161616),
-                          onRefresh: _loadIdeas,
-                          child: ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                            itemCount: ideas.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, i) => IdeaCard(
-                              idea: ideas[i],
-                              accent: accent,
-                            ),
-                          ),
-                        ),
+                  ? _EmptyState(accent: accent)
+                  : RefreshIndicator(
+                      color: accent,
+                      backgroundColor: const Color(0xFF161616),
+                      onRefresh: _loadIdeas,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        itemCount: ideas.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (context, i) =>
+                            IdeaCard(idea: ideas[i], accent: accent),
+                      ),
+                    ),
             ),
           ],
         ),
@@ -113,9 +115,7 @@ class _FeedScreenState extends State<FeedScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const PostIdeaScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const PostIdeaScreen()),
                 );
               },
               backgroundColor: accent,
@@ -169,7 +169,7 @@ class _FeedHeader extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'DM Sans',
                     fontSize: 13,
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                   ),
                 ),
               ],
@@ -178,7 +178,7 @@ class _FeedHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: accent.withOpacity(0.12),
+              color: accent.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -216,7 +216,7 @@ class _SearchBar extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF161616),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         ),
         child: TextField(
           controller: controller,
@@ -232,11 +232,11 @@ class _SearchBar extends StatelessWidget {
             hintStyle: TextStyle(
               fontFamily: 'DM Sans',
               fontSize: 14,
-              color: Colors.white.withOpacity(0.35),
+              color: Colors.white.withValues(alpha: 0.35),
             ),
             prefixIcon: Icon(
               Icons.search_rounded,
-              color: Colors.white.withOpacity(0.35),
+              color: Colors.white.withValues(alpha: 0.35),
             ),
             suffixIcon: ValueListenableBuilder<TextEditingValue>(
               valueListenable: controller,
@@ -251,7 +251,7 @@ class _SearchBar extends StatelessWidget {
                   },
                   icon: Icon(
                     Icons.close_rounded,
-                    color: Colors.white.withOpacity(0.45),
+                    color: Colors.white.withValues(alpha: 0.45),
                   ),
                 );
               },
@@ -328,7 +328,7 @@ class _FilterRow extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: options.length + 1,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           if (index == 0) {
             return _FilterPill(
@@ -374,12 +374,14 @@ class _FilterPill extends StatelessWidget {
         duration: const Duration(milliseconds: 160),
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? accent.withOpacity(0.18) : const Color(0xFF161616),
+          color: selected
+              ? accent.withValues(alpha: 0.18)
+              : const Color(0xFF161616),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected
-                ? accent.withOpacity(0.7)
-                : Colors.white.withOpacity(0.08),
+                ? accent.withValues(alpha: 0.7)
+                : Colors.white.withValues(alpha: 0.08),
           ),
         ),
         child: Text(
@@ -388,7 +390,7 @@ class _FilterPill extends StatelessWidget {
             fontFamily: 'DM Sans',
             fontSize: 12,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            color: selected ? accent : Colors.white.withOpacity(0.52),
+            color: selected ? accent : Colors.white.withValues(alpha: 0.52),
           ),
         ),
       ),
@@ -409,7 +411,7 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.lightbulb_outline_rounded,
             size: 48,
-            color: accent.withOpacity(0.4),
+            color: accent.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -427,7 +429,7 @@ class _EmptyState extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontSize: 14,
-              color: Colors.white.withOpacity(0.4),
+              color: Colors.white.withValues(alpha: 0.4),
             ),
           ),
         ],
