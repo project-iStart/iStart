@@ -9,14 +9,11 @@ class DiscussionService {
     List<String>? participants,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post(
-      '/discussion',
-      data: {
-        'startupIdeaId': ideaId,
-        'title': title,
-        'participants': ?participants,
-      },
-    );
+    final data = {'startupIdeaId': ideaId, 'title': title};
+    if (participants != null && participants.isNotEmpty) {
+      data['participants'] = participants as String;
+    }
+    final res = await dio.post('/discussion', data: data);
     return res.data;
   }
 
@@ -32,13 +29,11 @@ class DiscussionService {
     List<Map<String, dynamic>>? attachments,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post(
-      '/discussion/$threadId/messages',
-      data: {
-        'content': content,
-        'attachments': ?attachments,
-      },
-    );
+    final data = {'content': content};
+    if (attachments != null && attachments.isNotEmpty) {
+      data['attachments'] = attachments as String;
+    }
+    final res = await dio.post('/discussion/$threadId/messages', data: data);
     return res.data;
   }
 
