@@ -7,37 +7,46 @@ const Notification = require('../models/Notification');
 
 // POST /api/feedback
 router.post('/', auth, async (req, res) => {
-  const { startupIdeaId, category, rating, comment } = req.body;
+  const { category, rating, comment } = req.body;
+  const startupIdea = req.body.startupIdea || req.body.startupIdeaId || req.body.idea;
+
   try {
-    const idea = await StartupIdea.findById(startupIdeaId);
-    if (!idea) return res.status(404).json({ msg: 'Idea not found' });
+    const idea = await StartupIdea.findById(startupIdea);
+    if (!idea) return res.status(404).json({ message: 'Idea not found' });
 
     const feedback = new Feedback({
-      user: req.user.id, startupIdea: startupIdeaId, category, rating, comment
+      user: req.user.id,
+      startupIdea,
+      category,
+      rating,
+      comment,
     });
     await feedback.save();
 
-    await Notification.create({
-      user: idea.founder,
-      message: `Your idea "${idea.title}" received new feedback.`,
-      type: 'feedback',
-      refId: idea._id
-    });
+    if (idea.founder.toString() !== req.user.id) {
+      await Notification.create({
+        user: idea.founder,
+        message: `Your idea "${idea.title}" received new feedback.`,
+        type: 'feedback',
+        refId: idea._id,
+        triggeredBy: req.user.id,
+      });
+    }
 
-    res.json(feedback);
+    res.status(201).json(feedback);
   } catch (err) {
-    res.status(500).json({ msg: 'Server error' });
+    res.status(500).json({ message: err.message });
   }
 });
 
 // GET /api/feedback/:ideaId
-router.get('/:ideaId', async (req, res) => {
+router.get('/:ideaId', auth, async (req, res) => {
   try {
     const feedbacks = await Feedback.find({ startupIdea: req.params.ideaId })
       .populate('user', 'name profileImage role');
     res.json(feedbacks);
   } catch (err) {
-    res.status(500).json({ msg: 'Server error' });
+    res.status(500).json({ message: err.message });
   }
 });
 

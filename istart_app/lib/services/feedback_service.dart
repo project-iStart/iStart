@@ -11,10 +11,10 @@ class FeedbackService {
   }) async {
     final dio = await ApiClient.getClient();
     final res = await dio.post('/feedback', data: {
-      'idea': ideaId,
+      'startupIdea': ideaId,
       'category': category,
-      'comment': comment,
       'rating': rating,
+      if (comment.isNotEmpty) 'comment': comment,
     });
     return res.data;
   }

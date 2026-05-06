@@ -10,6 +10,7 @@ import '../screens/idea_detail_screen.dart';
 import '../screens/profile/public_profile_screen.dart';
 import '../screens/messaging_screen.dart';
 import '../screens/post_idea/post_idea_screen.dart';
+import '../screens/feedback/feedback_sheet.dart';
 import 'rocket_icon.dart';
 
 class IdeaCard extends StatelessWidget {
@@ -307,6 +308,8 @@ class IdeaCard extends StatelessWidget {
                   ],
                   const SizedBox(width: 12),
                   _VoteButton(idea: current, accent: accent),
+                  const SizedBox(width: 8),
+                  _FeedbackButton(ideaId: current.id),
                 ],
               ),
             ],
@@ -318,6 +321,37 @@ class IdeaCard extends StatelessWidget {
 }
 
 // ─── Idea Menu Button (Edit / Delete) ─────────────────────────────────────────
+
+class _FeedbackButton extends StatelessWidget {
+  const _FeedbackButton({required this.ideaId});
+
+  final String ideaId;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => FeedbackSheet.show(context, ideaId),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.rate_review_outlined, size: 16, color: Colors.white54),
+            SizedBox(width: 5),
+            Text(
+              'Feedback',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _IdeaMenuButton extends StatelessWidget {
   const _IdeaMenuButton({

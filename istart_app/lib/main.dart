@@ -14,6 +14,7 @@ import 'screens/onboarding/register_screen.dart';
 import 'screens/onboarding/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/profile/profile_screen.dart';
+import 'providers/feedback_provider.dart';
 
 final _router = GoRouter(
   initialLocation: '/',
@@ -55,6 +56,7 @@ class IStartApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DiscussionProvider()),
         ChangeNotifierProvider(create: (_) => JoinRequestProvider()),
         ChangeNotifierProvider(create: (_) => DocRequestProvider()),
+        ChangeNotifierProvider(create: (_) => FeedbackProvider()),
       ],
       child: MaterialApp.router(
         title: 'iStart',
