@@ -8,10 +8,10 @@ class JoinRequestService {
     required String message,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post('/join-requests', data: {
-      'idea': ideaId,
-      'message': message,
-    });
+    final res = await dio.post(
+      '/join-requests',
+      data: {'idea': ideaId, 'message': message},
+    );
     return res.data;
   }
 
@@ -22,9 +22,14 @@ class JoinRequestService {
   }
 
   Future<Map<String, dynamic>> updateStatus(
-      String requestId, String status) async {
+    String requestId,
+    String status,
+  ) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.patch('/join-requests/$requestId', data: {'status': status});
+    final res = await dio.put(
+      '/join-requests/$requestId',
+      data: {'status': status},
+    );
     return res.data;
   }
 }

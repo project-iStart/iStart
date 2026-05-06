@@ -76,7 +76,8 @@ router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const idea = await StartupIdea.findById(req.params.id)
       .populate('founder', 'name profileImage')
-      .populate('teamMembers', 'name profileImage role');
+      .populate('teamMembers', 'name profileImage role')
+      .populate('approvedInvestors', 'name profileImage investmentFocus');
     if (!idea) return res.status(404).json({ msg: 'Idea not found' });
 
     let isVoted = false;

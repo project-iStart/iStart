@@ -12,6 +12,7 @@ const StartupIdeaSchema = new mongoose.Schema({
   communityScore:   { type: Number, default: 0 },
   fundingInterest:  { type: Boolean, default: false },
   teamMembers:      [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  approvedInvestors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   fundingInterests: [
     {
       investor:    { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

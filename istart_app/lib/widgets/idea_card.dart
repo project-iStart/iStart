@@ -489,7 +489,6 @@ class _MessageButtonState extends State<_MessageButton> {
 
   Future<void> _loadThreadCount() async {
     try {
-      final provider = context.read<IdeaProvider>();
       // Trigger discussion provider to fetch threads
       await context.read<DiscussionProvider>().fetchThreadsForIdea(
         widget.idea.id,
