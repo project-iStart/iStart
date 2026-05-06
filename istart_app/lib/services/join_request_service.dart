@@ -10,7 +10,7 @@ class JoinRequestService {
     final dio = await ApiClient.getClient();
     final res = await dio.post(
       '/join-requests',
-      data: {'idea': ideaId, 'message': message},
+      data: {'startupIdeaId': ideaId, 'message': message},
     );
     return res.data;
   }

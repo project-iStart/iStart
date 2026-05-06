@@ -25,7 +25,7 @@ class JoinRequest {
 
   factory JoinRequest.fromJson(Map<String, dynamic> json) => JoinRequest(
     id: json['_id'] ?? '',
-    ideaId: json['idea'] ?? '',
+    ideaId: json['startupIdea']?['_id'] ?? json['startupIdea'] ?? '',
     collaboratorId: json['collaborator']?['_id'] ?? json['collaborator'] ?? '',
     collaboratorName: json['collaborator']?['name'] ?? 'Unknown',
     collaboratorEmail: json['collaborator']?['email'] ?? '',

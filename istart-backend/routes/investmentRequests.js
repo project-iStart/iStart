@@ -12,6 +12,9 @@ router.post('/', auth, async (req, res) => {
 
   const { startupIdeaId, fundingAmount, message } = req.body;
   try {
+    const idea = await StartupIdea.findById(startupIdeaId);
+    if (!idea) return res.status(404).json({ msg: 'Idea not found' });
+
     const existing = await InvestmentRequest.findOne({ 
       investor: req.user.id, 
       startupIdea: startupIdeaId,
@@ -27,7 +30,6 @@ router.post('/', auth, async (req, res) => {
     });
     await request.save();
 
-    const idea = await StartupIdea.findById(startupIdeaId);
     await Notification.create({
       user: idea.founder,
       message: `New funding request received from an investor for "${idea.title}".`,

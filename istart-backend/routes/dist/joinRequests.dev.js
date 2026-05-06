@@ -14,7 +14,7 @@ var Notification = require('../models/Notification'); // POST — collaborator s
 
 
 router.post('/', auth, function _callee(req, res) {
-  var _req$body, startupIdeaId, message, existing, request, idea;
+  var _req$body, startupIdeaId, message, idea, existing, request;
 
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
@@ -33,17 +33,33 @@ router.post('/', auth, function _callee(req, res) {
           _req$body = req.body, startupIdeaId = _req$body.startupIdeaId, message = _req$body.message;
           _context.prev = 3;
           _context.next = 6;
+          return regeneratorRuntime.awrap(StartupIdea.findById(startupIdeaId));
+
+        case 6:
+          idea = _context.sent;
+
+          if (idea) {
+            _context.next = 9;
+            break;
+          }
+
+          return _context.abrupt("return", res.status(404).json({
+            msg: 'Idea not found'
+          }));
+
+        case 9:
+          _context.next = 11;
           return regeneratorRuntime.awrap(JoinRequest.findOne({
             collaborator: req.user.id,
             startupIdea: startupIdeaId,
             status: 'pending'
           }));
 
-        case 6:
+        case 11:
           existing = _context.sent;
 
           if (!existing) {
-            _context.next = 9;
+            _context.next = 14;
             break;
           }
 
@@ -51,22 +67,17 @@ router.post('/', auth, function _callee(req, res) {
             msg: 'Request already sent'
           }));
 
-        case 9:
+        case 14:
           request = new JoinRequest({
             collaborator: req.user.id,
             startupIdea: startupIdeaId,
             message: message
           });
-          _context.next = 12;
+          _context.next = 17;
           return regeneratorRuntime.awrap(request.save());
 
-        case 12:
-          _context.next = 14;
-          return regeneratorRuntime.awrap(StartupIdea.findById(startupIdeaId));
-
-        case 14:
-          idea = _context.sent;
-          _context.next = 17;
+        case 17:
+          _context.next = 19;
           return regeneratorRuntime.awrap(Notification.create({
             user: idea.founder,
             message: "New join request received for \"".concat(idea.title, "\"."),
@@ -74,24 +85,24 @@ router.post('/', auth, function _callee(req, res) {
             refId: request._id
           }));
 
-        case 17:
+        case 19:
           res.json(request);
-          _context.next = 23;
+          _context.next = 25;
           break;
 
-        case 20:
-          _context.prev = 20;
+        case 22:
+          _context.prev = 22;
           _context.t0 = _context["catch"](3);
           res.status(500).json({
             msg: 'Server error'
           });
 
-        case 23:
+        case 25:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[3, 20]]);
+  }, null, null, [[3, 22]]);
 }); // GET — founder views requests for a specific startup
 
 router.get('/:ideaId', auth, function _callee2(req, res) {

@@ -12,6 +12,9 @@ router.post('/', auth, async (req, res) => {
 
   const { startupIdeaId, message } = req.body;
   try {
+    const idea = await StartupIdea.findById(startupIdeaId);
+    if (!idea) return res.status(404).json({ msg: 'Idea not found' });
+
     const existing = await JoinRequest.findOne({ 
       collaborator: req.user.id, 
       startupIdea: startupIdeaId,
@@ -22,7 +25,6 @@ router.post('/', auth, async (req, res) => {
     const request = new JoinRequest({ collaborator: req.user.id, startupIdea: startupIdeaId, message });
     await request.save();
 
-    const idea = await StartupIdea.findById(startupIdeaId);
     await Notification.create({
       user: idea.founder,
       message: `New join request received for "${idea.title}".`,
