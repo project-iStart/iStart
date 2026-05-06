@@ -47,18 +47,22 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ideas = context.watch<IdeaProvider>().ideas;
-    final loading = context.watch<IdeaProvider>().loading;
+    final ideaProvider = context.watch<IdeaProvider>();
+    final ideas = ideaProvider.ideas;
+    final loading = ideaProvider.loading;
+
     final user = context.watch<AuthProvider>().user;
     final role = user?.role ?? 'founder';
     final accent = _accentForRole(role);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D0D),
+      resizeToAvoidBottomInset: true, // helps with keyboard overflow
       body: SafeArea(
         child: Column(
           children: [
             _FeedHeader(accent: accent, role: role),
+
             _SearchBar(
               controller: _searchController,
               accent: accent,
@@ -66,11 +70,14 @@ class _FeedScreenState extends State<FeedScreen> {
                 context.read<IdeaProvider>().setSearchQuery(query);
               },
             ),
+
             _FilterBar(
               accent: accent,
               categories: _categories,
               stages: _stages,
             ),
+
+            // THIS Expanded ensures no overflow happens
             Expanded(
               child: loading
                   ? Center(
@@ -100,6 +107,7 @@ class _FeedScreenState extends State<FeedScreen> {
           ],
         ),
       ),
+
       floatingActionButton: role == 'founder'
           ? FloatingActionButton(
               onPressed: () {
@@ -138,46 +146,50 @@ class _FeedHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = switch (role) {
-      'investor' => 'Discover startup ideas',
-      'collaborator' => 'Find teams to join',
-      _ => 'Explore the feed',
-    };
-
-    final subtitle = switch (role) {
-      'investor' => 'Track promising founders and funding-ready concepts.',
-      'collaborator' => 'Browse ideas where your skills can make an impact.',
-      _ => 'See what the community is building right now.',
-    };
-
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      child: Row(
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontFamily: 'Sora',
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'iStart',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: -0.6,
+                  ),
+                ),
+                Text(
+                  'Explore startup ideas',
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.4),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 14,
-              height: 1.5,
-              color: Colors.white.withOpacity(0.62),
-            ),
-          ),
-          const SizedBox(height: 16),
           Container(
-            height: 1,
-            color: accent.withOpacity(0.16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              color: accent.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              role[0].toUpperCase() + role.substring(1),
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: accent,
+              ),
+            ),
           ),
         ],
       ),
@@ -199,34 +211,53 @@ class _SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        style: const TextStyle(
-          color: Colors.white,
-          fontFamily: 'DM Sans',
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
-        decoration: InputDecoration(
-          hintText: 'Search ideas, categories, or keywords',
-          hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.35),
+        child: TextField(
+          controller: controller,
+          onChanged: onChanged,
+          cursorColor: accent,
+          style: const TextStyle(
             fontFamily: 'DM Sans',
+            fontSize: 14,
+            color: Colors.white,
           ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: Colors.white.withOpacity(0.45),
-          ),
-          filled: true,
-          fillColor: const Color(0xFF161616),
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: accent.withOpacity(0.7)),
+          decoration: InputDecoration(
+            hintText: 'Search ideas, problems, categories...',
+            hintStyle: TextStyle(
+              fontFamily: 'DM Sans',
+              fontSize: 14,
+              color: Colors.white.withOpacity(0.35),
+            ),
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: Colors.white.withOpacity(0.35),
+            ),
+            suffixIcon: ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context, value, _) {
+                if (value.text.isEmpty) return const SizedBox.shrink();
+
+                return IconButton(
+                  tooltip: 'Clear search',
+                  onPressed: () {
+                    controller.clear();
+                    onChanged('');
+                  },
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: Colors.white.withOpacity(0.45),
+                  ),
+                );
+              },
+            ),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
           ),
         ),
       ),
@@ -247,46 +278,26 @@ class _FilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<IdeaProvider>();
+    final ideaProvider = context.watch<IdeaProvider>();
 
-    return SizedBox(
-      height: 108,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
       child: Column(
         children: [
           _FilterRow(
-            label: 'Category',
+            title: 'Category',
             accent: accent,
-            selectedValue: provider.selectedCategory,
             options: categories,
-            onSelected: (value) {
-              provider.setSelectedCategory(
-                provider.selectedCategory == value ? null : value,
-              );
-            },
+            selectedValue: ideaProvider.selectedCategory,
+            onSelected: context.read<IdeaProvider>().setSelectedCategory,
           ),
+          const SizedBox(height: 8),
           _FilterRow(
-            label: 'Stage',
+            title: 'Stage',
             accent: accent,
-            selectedValue: provider.selectedStage,
             options: stages,
-            onSelected: (value) {
-              provider.setSelectedStage(
-                provider.selectedStage == value ? null : value,
-              );
-            },
-            trailing: TextButton(
-              onPressed: () {
-                provider.clearFilters();
-              },
-              child: Text(
-                'Clear',
-                style: TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w600,
-                  color: accent,
-                ),
-              ),
-            ),
+            selectedValue: ideaProvider.selectedStage,
+            onSelected: context.read<IdeaProvider>().setSelectedStage,
           ),
         ],
       ),
@@ -296,136 +307,130 @@ class _FilterBar extends StatelessWidget {
 
 class _FilterRow extends StatelessWidget {
   const _FilterRow({
+    required this.title,
+    required this.accent,
+    required this.options,
+    required this.selectedValue,
+    required this.onSelected,
+  });
+
+  final String title;
+  final Color accent;
+  final List<String> options;
+  final String? selectedValue;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 34,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: options.length + 1,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return _FilterPill(
+              label: title,
+              accent: accent,
+              selected: selectedValue == null,
+              onTap: () => onSelected(null),
+            );
+          }
+
+          final option = options[index - 1];
+          return _FilterPill(
+            label: option,
+            accent: accent,
+            selected: selectedValue == option,
+            onTap: () => onSelected(selectedValue == option ? null : option),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _FilterPill extends StatelessWidget {
+  const _FilterPill({
     required this.label,
     required this.accent,
-    required this.selectedValue,
-    required this.options,
-    required this.onSelected,
-    this.trailing,
+    required this.selected,
+    required this.onTap,
   });
 
   final String label;
   final Color accent;
-  final String? selectedValue;
-  final List<String> options;
-  final ValueChanged<String> onSelected;
-  final Widget? trailing;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
-          child: Row(
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white.withOpacity(0.58),
-                ),
-              ),
-              const Spacer(),
-              if (trailing != null) trailing!,
-            ],
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? accent.withOpacity(0.18) : const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected
+                ? accent.withOpacity(0.7)
+                : Colors.white.withOpacity(0.08),
           ),
         ),
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            scrollDirection: Axis.horizontal,
-            itemCount: options.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final option = options[index];
-              final selected = selectedValue == option;
-              return ChoiceChip(
-                label: Text(
-                  option,
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w600,
-                    color: selected
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.65),
-                  ),
-                ),
-                selected: selected,
-                onSelected: (_) => onSelected(option),
-                selectedColor: accent.withOpacity(0.88),
-                backgroundColor: const Color(0xFF161616),
-                side: BorderSide(
-                  color: selected
-                      ? Colors.transparent
-                      : Colors.white.withOpacity(0.08),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                showCheckmark: false,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-              );
-            },
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'DM Sans',
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            color: selected ? accent : Colors.white.withOpacity(0.52),
           ),
         ),
-      ],
+      ),
     );
   }
 }
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.accent});
-
   final Color accent;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: accent.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Icon(
-                Icons.lightbulb_outline_rounded,
-                color: accent,
-                size: 34,
-              ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.lightbulb_outline_rounded,
+            size: 48,
+            color: accent.withOpacity(0.4),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'No ideas yet',
+            style: TextStyle(
+              fontFamily: 'Sora',
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
-            const SizedBox(height: 18),
-            const Text(
-              'No ideas found',
-              style: TextStyle(
-                fontFamily: 'Sora',
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Be the first to post a startup idea.',
+            style: TextStyle(
+              fontFamily: 'DM Sans',
+              fontSize: 14,
+              color: Colors.white.withOpacity(0.4),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Try a different search or clear your filters to explore more startup ideas.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 14,
-                height: 1.5,
-                color: Colors.white.withOpacity(0.6),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
