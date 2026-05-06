@@ -15,6 +15,7 @@ class StartupIdea {
   final int voteCount;
   final bool hasFundingInterest;
   final int fundingInterestCount;
+  final bool isFollowing;
 
   StartupIdea({
     required this.id,
@@ -33,26 +34,28 @@ class StartupIdea {
     this.voteCount = 0,
     this.hasFundingInterest = false,
     this.fundingInterestCount = 0,
+    this.isFollowing = false,
   });
 
   factory StartupIdea.fromJson(Map<String, dynamic> json) => StartupIdea(
-        id: json['_id'] ?? '',
-        title: json['title'] ?? '',
-        description: json['description'] ?? '',
-        problemStatement: json['problemStatement'],
-        category: json['category'],
-        stage: json['stage'],
-        pitchDeckUrl: json['pitchDeckUrl'],
-        communityScore: json['communityScore'] ?? 0,
-        fundingInterest: json['fundingInterest'] ?? false,
-        founder: json['founder'] ?? {},
-        teamMembers: json['teamMembers'] ?? [],
-        isBookmarked: json['isBookmarked'] ?? false,
-        isVoted: json['isVoted'] ?? false,
-        voteCount: json['voteCount'] ?? 0,
-        hasFundingInterest: json['hasFundingInterest'] ?? false,
-        fundingInterestCount: json['fundingInterestCount'] ?? 0,
-      );
+    id: json['_id'] ?? '',
+    title: json['title'] ?? '',
+    description: json['description'] ?? '',
+    problemStatement: json['problemStatement'],
+    category: json['category'],
+    stage: json['stage'],
+    pitchDeckUrl: json['pitchDeckUrl'],
+    communityScore: json['communityScore'] ?? 0,
+    fundingInterest: json['fundingInterest'] ?? false,
+    founder: json['founder'] ?? {},
+    teamMembers: json['teamMembers'] ?? [],
+    isBookmarked: json['isBookmarked'] ?? false,
+    isVoted: json['isVoted'] ?? false,
+    voteCount: json['voteCount'] ?? 0,
+    hasFundingInterest: json['hasFundingInterest'] ?? false,
+    fundingInterestCount: json['fundingInterestCount'] ?? 0,
+    isFollowing: json['isFollowing'] ?? false,
+  );
 
   StartupIdea copyWith({
     bool? isBookmarked,
@@ -60,23 +63,24 @@ class StartupIdea {
     int? voteCount,
     bool? hasFundingInterest,
     int? fundingInterestCount,
-  }) =>
-      StartupIdea(
-        id: id,
-        title: title,
-        description: description,
-        problemStatement: problemStatement,
-        category: category,
-        stage: stage,
-        pitchDeckUrl: pitchDeckUrl,
-        communityScore: communityScore,
-        fundingInterest: fundingInterest,
-        founder: founder,
-        teamMembers: teamMembers,
-        isBookmarked: isBookmarked ?? this.isBookmarked,
-        isVoted: isVoted ?? this.isVoted,
-        voteCount: voteCount ?? this.voteCount,
-        hasFundingInterest: hasFundingInterest ?? this.hasFundingInterest,
-        fundingInterestCount: fundingInterestCount ?? this.fundingInterestCount,
-      );
+    bool? isFollowing,
+  }) => StartupIdea(
+    id: id,
+    title: title,
+    description: description,
+    problemStatement: problemStatement,
+    category: category,
+    stage: stage,
+    pitchDeckUrl: pitchDeckUrl,
+    communityScore: communityScore,
+    fundingInterest: fundingInterest,
+    founder: founder,
+    teamMembers: teamMembers,
+    isBookmarked: isBookmarked ?? this.isBookmarked,
+    isVoted: isVoted ?? this.isVoted,
+    voteCount: voteCount ?? this.voteCount,
+    hasFundingInterest: hasFundingInterest ?? this.hasFundingInterest,
+    fundingInterestCount: fundingInterestCount ?? this.fundingInterestCount,
+    isFollowing: isFollowing ?? this.isFollowing,
+  );
 }

@@ -6,6 +6,7 @@ import '../models/startup_idea.dart';
 import '../providers/idea_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/rocket_icon.dart';
+import 'send_doc_request_dialog.dart';
 
 class IdeaDetailScreen extends StatefulWidget {
   final String ideaId;
@@ -89,6 +90,18 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                       ),
                     ),
                     actions: [
+                      if (role == 'investor')
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: _DocumentRequestButton(
+                            idea: idea,
+                            accent: accent,
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _FollowButton(idea: idea, accent: accent),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(right: 16),
                         child: _BookmarkButton(idea: idea, accent: accent),
@@ -776,6 +789,154 @@ class _BookmarkButtonState extends State<_BookmarkButton>
                   ? Icons.bookmark_rounded
                   : Icons.bookmark_outline_rounded,
               color: widget.idea.isBookmarked
+                  ? widget.accent
+                  : Colors.white.withOpacity(0.4),
+              size: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Document Request Button ─────────────────────────────────────────────────
+
+class _DocumentRequestButton extends StatefulWidget {
+  const _DocumentRequestButton({required this.idea, required this.accent});
+
+  final StartupIdea idea;
+  final Color accent;
+
+  @override
+  State<_DocumentRequestButton> createState() => _DocumentRequestButtonState();
+}
+
+class _DocumentRequestButtonState extends State<_DocumentRequestButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) => SendDocRequestDialog(
+        ideaId: widget.idea.id,
+        ideaTitle: widget.idea.title,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _onTap,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFF161616),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.file_copy_outlined,
+              color: Colors.white.withOpacity(0.6),
+              size: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Follow Button ────────────────────────────────────────────────────────────
+
+class _FollowButton extends StatefulWidget {
+  const _FollowButton({required this.idea, required this.accent});
+
+  final StartupIdea idea;
+  final Color accent;
+
+  @override
+  State<_FollowButton> createState() => _FollowButtonState();
+}
+
+class _FollowButtonState extends State<_FollowButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+    if (!mounted) return;
+    context.read<IdeaProvider>().toggleFollow(widget.idea.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _onTap,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFF161616),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Icon(
+              widget.idea.isFollowing
+                  ? Icons.notifications_rounded
+                  : Icons.notifications_none_rounded,
+              color: widget.idea.isFollowing
                   ? widget.accent
                   : Colors.white.withOpacity(0.4),
               size: 20,

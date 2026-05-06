@@ -74,4 +74,18 @@ class IdeaService {
     final res = await dio.post('/ideas/$ideaId/fund-interest');
     return res.data as Map<String, dynamic>;
   }
+
+  /// Follow or unfollow an idea (investors tracking ideas)
+  Future<Map<String, dynamic>> toggleFollow(String ideaId) async {
+    final dio = await ApiClient.getClient();
+    final res = await dio.post('/ideas/$ideaId/follow');
+    return res.data as Map<String, dynamic>;
+  }
+
+  /// Get follower count for an idea
+  Future<int> getFollowerCount(String ideaId) async {
+    final dio = await ApiClient.getClient();
+    final res = await dio.get('/ideas/$ideaId/followers/count');
+    return res.data['count'] as int? ?? 0;
+  }
 }

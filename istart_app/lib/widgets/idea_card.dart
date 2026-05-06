@@ -65,6 +65,8 @@ class IdeaCard extends StatelessWidget {
                       ),
                     ),
                   const Spacer(),
+                  _FollowButton(idea: current, accent: accent),
+                  const SizedBox(width: 8),
                   _BookmarkButton(idea: current, accent: accent),
                 ],
               ),
@@ -511,4 +513,81 @@ class _BookmarkPainter extends CustomPainter {
   @override
   bool shouldRepaint(_BookmarkPainter old) =>
       old.color != color || old.filled != filled;
+}
+
+// ─── Follow Button ────────────────────────────────────────────────────────────
+
+class _FollowButton extends StatefulWidget {
+  const _FollowButton({required this.idea, required this.accent});
+
+  final StartupIdea idea;
+  final Color accent;
+
+  @override
+  State<_FollowButton> createState() => _FollowButtonState();
+}
+
+class _FollowButtonState extends State<_FollowButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+    if (!mounted) return;
+    context.read<IdeaProvider>().toggleFollow(widget.idea.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _onTap,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: widget.idea.isFollowing
+                ? widget.accent.withOpacity(0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: widget.idea.isFollowing
+                  ? widget.accent
+                  : Colors.white.withOpacity(0.2),
+            ),
+          ),
+          child: Icon(
+            widget.idea.isFollowing
+                ? Icons.notifications_rounded
+                : Icons.notifications_none_rounded,
+            color: widget.idea.isFollowing
+                ? widget.accent
+                : Colors.white.withOpacity(0.5),
+            size: 18,
+          ),
+        ),
+      ),
+    );
+  }
 }

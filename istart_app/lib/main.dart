@@ -7,6 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/idea_provider.dart';
 import 'providers/discussion_provider.dart';
 import 'providers/join_request_provider.dart';
+import 'providers/doc_request_provider.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/onboarding/role_selection_screen.dart';
 import 'screens/onboarding/register_screen.dart';
@@ -53,6 +54,7 @@ class IStartApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => IdeaProvider()),
         ChangeNotifierProvider(create: (_) => DiscussionProvider()),
         ChangeNotifierProvider(create: (_) => JoinRequestProvider()),
+        ChangeNotifierProvider(create: (_) => DocRequestProvider()),
       ],
       child: MaterialApp.router(
         title: 'iStart',

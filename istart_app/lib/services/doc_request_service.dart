@@ -8,10 +8,10 @@ class DocRequestService {
     required String requestMessage,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post('/doc-requests', data: {
-      'idea': ideaId,
-      'requestMessage': requestMessage,
-    });
+    final res = await dio.post(
+      '/doc-requests',
+      data: {'startupIdeaId': ideaId, 'requestMessage': requestMessage},
+    );
     return res.data;
   }
 
@@ -27,10 +27,10 @@ class DocRequestService {
     String? fileUrl,
   }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.patch('/doc-requests/$requestId/reply', data: {
-      'replyMessage': replyMessage,
-      'fileUrl': ?fileUrl,
-    });
+    final res = await dio.put(
+      '/doc-requests/$requestId',
+      data: {'responseMessage': replyMessage, 'fileUrl': fileUrl},
+    );
     return res.data;
   }
 }

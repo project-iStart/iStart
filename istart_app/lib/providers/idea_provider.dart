@@ -7,6 +7,8 @@ import '../services/idea_service.dart';
 
 class IdeaProvider extends ChangeNotifier {
   static const String _bookmarkedIdeaIdsKey = 'bookmarked_idea_ids';
+  static const String _votedIdeaIdsKey = 'voted_idea_ids';
+  static const String _followedIdeaIdsKey = 'followed_idea_ids';
   final IdeaService _service = IdeaService();
 
   List<StartupIdea> _ideas = [];
@@ -23,6 +25,8 @@ class IdeaProvider extends ChangeNotifier {
   List<StartupIdea> get allIdeas => _ideas;
   List<StartupIdea> get bookmarkedIdeas =>
       _ideas.where((idea) => idea.isBookmarked).toList();
+  List<StartupIdea> get followedIdeas =>
+      _ideas.where((idea) => idea.isFollowing).toList();
   StartupIdea? get selectedIdea => _selectedIdea;
   bool get loading => _loading;
   String? get error => _error;
@@ -100,6 +104,26 @@ class IdeaProvider extends ChangeNotifier {
     await prefs.setStringList(_bookmarkedIdeaIdsKey, ids.toList());
   }
 
+  Future<Set<String>> _getStoredVotedIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_votedIdeaIdsKey)?.toSet() ?? <String>{};
+  }
+
+  Future<void> _saveStoredVotedIds(Set<String> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_votedIdeaIdsKey, ids.toList());
+  }
+
+  Future<Set<String>> _getStoredFollowedIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_followedIdeaIdsKey)?.toSet() ?? <String>{};
+  }
+
+  Future<void> _saveStoredFollowedIds(Set<String> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_followedIdeaIdsKey, ids.toList());
+  }
+
   Future<void> fetchIdeas({
     String? category,
     String? stage,
@@ -109,18 +133,29 @@ class IdeaProvider extends ChangeNotifier {
     _error = null;
     try {
       final storedBookmarkedIds = await _getStoredBookmarkedIds();
+      final storedVotedIds = await _getStoredVotedIds();
+      final storedFollowedIds = await _getStoredFollowedIds();
       final fetchedIdeas = await _service.getIdeas(
         category: category,
         stage: stage,
         search: search,
       );
-      _ideas = fetchedIdeas
-          .map(
-            (idea) => storedBookmarkedIds.contains(idea.id) && !idea.isBookmarked
-                ? idea.copyWith(isBookmarked: true)
-                : idea,
-          )
-          .toList();
+      _ideas = fetchedIdeas.map((idea) {
+        var updatedIdea = idea;
+        // Restore bookmarked status from local storage
+        if (storedBookmarkedIds.contains(idea.id) && !idea.isBookmarked) {
+          updatedIdea = updatedIdea.copyWith(isBookmarked: true);
+        }
+        // Restore voted status from local storage
+        if (storedVotedIds.contains(idea.id) && !idea.isVoted) {
+          updatedIdea = updatedIdea.copyWith(isVoted: true);
+        }
+        // Restore following status from local storage
+        if (storedFollowedIds.contains(idea.id) && !idea.isFollowing) {
+          updatedIdea = updatedIdea.copyWith(isFollowing: true);
+        }
+        return updatedIdea;
+      }).toList();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -134,10 +169,23 @@ class IdeaProvider extends ChangeNotifier {
     try {
       final fetched = await _service.getIdeaById(id);
       final storedBookmarkedIds = await _getStoredBookmarkedIds();
-      final syncedIdea =
-          storedBookmarkedIds.contains(fetched.id) && !fetched.isBookmarked
-              ? fetched.copyWith(isBookmarked: true)
-              : fetched;
+      final storedVotedIds = await _getStoredVotedIds();
+      final storedFollowedIds = await _getStoredFollowedIds();
+      var syncedIdea = fetched;
+
+      // Restore bookmarked status from local storage
+      if (storedBookmarkedIds.contains(fetched.id) && !fetched.isBookmarked) {
+        syncedIdea = syncedIdea.copyWith(isBookmarked: true);
+      }
+      // Restore voted status from local storage
+      if (storedVotedIds.contains(fetched.id) && !fetched.isVoted) {
+        syncedIdea = syncedIdea.copyWith(isVoted: true);
+      }
+      // Restore following status from local storage
+      if (storedFollowedIds.contains(fetched.id) && !fetched.isFollowing) {
+        syncedIdea = syncedIdea.copyWith(isFollowing: true);
+      }
+
       _selectedIdea = syncedIdea;
 
       final idx = _ideas.indexWhere((idea) => idea.id == id);
@@ -218,13 +266,19 @@ class IdeaProvider extends ChangeNotifier {
           ? result['voteCount'] as int
           : int.tryParse('${result['voteCount']}') ?? 0;
 
+      // Update local storage for voted ideas
+      final storedVotedIds = await _getStoredVotedIds();
+      if (isVoted) {
+        storedVotedIds.add(id);
+      } else {
+        storedVotedIds.remove(id);
+      }
+      await _saveStoredVotedIds(storedVotedIds);
+
       final idx = _ideas.indexWhere((i) => i.id == id);
       if (idx != -1) {
         final current = _ideas[idx];
-        _ideas[idx] = current.copyWith(
-          isVoted: isVoted,
-          voteCount: voteCount,
-        );
+        _ideas[idx] = current.copyWith(isVoted: isVoted, voteCount: voteCount);
       }
 
       if (_selectedIdea?.id == id) {
@@ -244,6 +298,38 @@ class IdeaProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  /// Toggle follow status for an idea (investors tracking ideas)
+  Future<void> toggleFollow(String id) async {
+    try {
+      final result = await _service.toggleFollow(id);
+      final isFollowing = result['isFollowing'] == true;
+
+      // Update local storage for followed ideas
+      final storedFollowedIds = await _getStoredFollowedIds();
+      if (isFollowing) {
+        storedFollowedIds.add(id);
+      } else {
+        storedFollowedIds.remove(id);
+      }
+      await _saveStoredFollowedIds(storedFollowedIds);
+
+      final idx = _ideas.indexWhere((i) => i.id == id);
+      if (idx != -1) {
+        final current = _ideas[idx];
+        _ideas[idx] = current.copyWith(isFollowing: isFollowing);
+      }
+
+      if (_selectedIdea?.id == id) {
+        _selectedIdea = _selectedIdea!.copyWith(isFollowing: isFollowing);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
   }
 
   Future<void> fundInterest(String ideaId) async {
