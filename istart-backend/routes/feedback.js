@@ -14,6 +14,11 @@ router.post('/', auth, async (req, res) => {
     const idea = await StartupIdea.findById(startupIdea);
     if (!idea) return res.status(404).json({ message: 'Idea not found' });
 
+    // Block founder from giving feedback on their own idea
+    if (idea.founder.toString() === req.user.id) {
+      return res.status(403).json({ message: 'You cannot give feedback on your own idea.' });
+    }
+
     const feedback = new Feedback({
       user: req.user.id,
       startupIdea,
@@ -23,15 +28,13 @@ router.post('/', auth, async (req, res) => {
     });
     await feedback.save();
 
-    if (idea.founder.toString() !== req.user.id) {
-      await Notification.create({
-        user: idea.founder,
-        message: `Your idea "${idea.title}" received new feedback.`,
-        type: 'feedback',
-        refId: idea._id,
-        triggeredBy: req.user.id,
-      });
-    }
+    await Notification.create({
+      user: idea.founder,
+      message: `Your idea "${idea.title}" received new feedback.`,
+      type: 'feedback',
+      refId: idea._id,
+      triggeredBy: req.user.id,
+    });
 
     res.status(201).json(feedback);
   } catch (err) {

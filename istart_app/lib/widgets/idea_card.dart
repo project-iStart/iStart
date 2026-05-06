@@ -309,7 +309,7 @@ class IdeaCard extends StatelessWidget {
                   const SizedBox(width: 12),
                   _VoteButton(idea: current, accent: accent),
                   const SizedBox(width: 8),
-                  _FeedbackButton(ideaId: current.id),
+                  if (!isOwn) _FeedbackButton(ideaId: current.id),
                 ],
               ),
             ],
