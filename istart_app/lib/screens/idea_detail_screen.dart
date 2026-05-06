@@ -118,8 +118,7 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                           child: _JoinRequestButton(idea: idea, accent: accent),
                         ),
                       if (user != null &&
-                          (user.id == idea.founder['_id'] ||
-                              user.id == idea.founder))
+                          user.id == (idea.founder['_id'] ?? idea.founder['id'] ?? ''))
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: _ManageInvestmentRequestsButton(
@@ -128,8 +127,7 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                           ),
                         ),
                       if (user != null &&
-                          (user.id == idea.founder['_id'] ||
-                              user.id == idea.founder))
+                          user.id == (idea.founder['_id'] ?? idea.founder['id'] ?? ''))
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: _ManageJoinRequestsButton(
