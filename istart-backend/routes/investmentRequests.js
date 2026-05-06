@@ -41,6 +41,20 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// GET — investor views their funding requests (must come before /:ideaId route)
+router.get('/investor/my-requests', auth, async (req, res) => {
+  if (req.user.role !== 'investor')
+    return res.status(403).json({ msg: 'Only investors can view their requests' });
+
+  try {
+    const requests = await InvestmentRequest.find({ investor: req.user.id })
+      .populate('startupIdea', 'title description stage');
+    res.json(requests);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // GET — founder views pending investment requests for a startup
 router.get('/:ideaId', auth, async (req, res) => {
   try {
@@ -91,20 +105,6 @@ router.put('/:id', auth, async (req, res) => {
     });
 
     res.json(request);
-  } catch (err) {
-    res.status(500).json({ msg: 'Server error' });
-  }
-});
-
-// GET — investor views their funding requests
-router.get('/investor/my-requests', auth, async (req, res) => {
-  if (req.user.role !== 'investor')
-    return res.status(403).json({ msg: 'Only investors can view their requests' });
-
-  try {
-    const requests = await InvestmentRequest.find({ investor: req.user.id })
-      .populate('startupIdea', 'title description stage');
-    res.json(requests);
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
   }

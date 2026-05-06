@@ -10,6 +10,8 @@ import 'send_doc_request_dialog.dart';
 import 'send_short_message_dialog.dart';
 import 'send_funding_request_dialog.dart';
 import 'investment_request_management_screen.dart';
+import 'join_request_management_screen.dart';
+import 'join_request_screen.dart';
 import 'profile/public_profile_screen.dart';
 
 class IdeaDetailScreen extends StatefulWidget {
@@ -113,7 +115,14 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                       if (role == 'collaborator')
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
-                          child: _MessageButtonDetail(
+                          child: _JoinRequestButton(idea: idea, accent: accent),
+                        ),
+                      if (user != null &&
+                          (user.id == idea.founder['_id'] ||
+                              user.id == idea.founder))
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: _ManageInvestmentRequestsButton(
                             idea: idea,
                             accent: accent,
                           ),
@@ -123,7 +132,7 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                               user.id == idea.founder))
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
-                          child: _ManageInvestmentRequestsButton(
+                          child: _ManageJoinRequestsButton(
                             idea: idea,
                             accent: accent,
                           ),
@@ -1211,6 +1220,151 @@ class _ManageInvestmentRequestsButtonState
           child: Center(
             child: Icon(
               Icons.trending_up_rounded,
+              color: Colors.white.withOpacity(0.6),
+              size: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Join Request Button ──────────────────────────────────────────────────────
+
+class _JoinRequestButton extends StatefulWidget {
+  const _JoinRequestButton({required this.idea, required this.accent});
+
+  final StartupIdea idea;
+  final Color accent;
+
+  @override
+  State<_JoinRequestButton> createState() => _JoinRequestButtonState();
+}
+
+class _JoinRequestButtonState extends State<_JoinRequestButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => JoinRequestScreen(idea: widget.idea)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _onTap,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFF161616),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.handshake_outlined,
+              color: Colors.white.withOpacity(0.6),
+              size: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Manage Join Requests Button ──────────────────────────────────────────────
+
+class _ManageJoinRequestsButton extends StatefulWidget {
+  const _ManageJoinRequestsButton({required this.idea, required this.accent});
+
+  final StartupIdea idea;
+  final Color accent;
+
+  @override
+  State<_ManageJoinRequestsButton> createState() =>
+      _ManageJoinRequestsButtonState();
+}
+
+class _ManageJoinRequestsButtonState extends State<_ManageJoinRequestsButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => JoinRequestManagementScreen(idea: widget.idea),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _onTap,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFF161616),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.people_outline_rounded,
               color: Colors.white.withOpacity(0.6),
               size: 20,
             ),
