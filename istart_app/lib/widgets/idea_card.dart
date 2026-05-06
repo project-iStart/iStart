@@ -141,9 +141,10 @@ class IdeaCard extends StatelessWidget {
                   ),
                 ),
 
-              // Bottom row — stage + fund button + rocket vote
+              // Bottom row — stage + role-specific button + vote button
               Row(
                 children: [
+                  // Stage on left
                   if (idea.stage != null) ...[
                     Icon(
                       Icons.circle,
@@ -161,9 +162,10 @@ class IdeaCard extends StatelessWidget {
                     ),
                   ],
                   const Spacer(),
+                  // Role-specific buttons
                   if (userRole == 'investor') ...[
                     _FundButton(idea: current),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -174,7 +176,7 @@ class IdeaCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
-                        'Funding interest',
+                        'Funding',
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 10,
@@ -183,8 +185,11 @@ class IdeaCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ] else if (userRole == 'collaborator') ...[
+                    _MessageButton(idea: current, accent: accent),
                   ],
-                  const Spacer(),
+                  const SizedBox(width: 12),
+                  // Vote button on right
                   _VoteButton(idea: idea, accent: accent),
                 ],
               ),
@@ -395,6 +400,60 @@ class _VoteButtonState extends State<_VoteButton>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Message Button (for Collaborators) ────────────────────────────────────────
+
+class _MessageButton extends StatelessWidget {
+  const _MessageButton({required this.idea, required this.accent});
+
+  final StartupIdea idea;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Message feature - Connect with the founder'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // TODO: Implement messaging screen
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(
+        //     builder: (context) => MessagingScreen(ideaId: idea.id),
+        //   ),
+        // );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: accent.withOpacity(0.4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.mail_outline_rounded, color: accent, size: 15),
+            const SizedBox(width: 4),
+            Text(
+              'Message',
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: accent,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

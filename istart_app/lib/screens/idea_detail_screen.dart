@@ -7,6 +7,7 @@ import '../providers/idea_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/rocket_icon.dart';
 import 'send_doc_request_dialog.dart';
+import 'send_short_message_dialog.dart';
 
 class IdeaDetailScreen extends StatefulWidget {
   final String ideaId;
@@ -98,12 +99,20 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                             accent: accent,
                           ),
                         ),
+                      if (role == 'collaborator')
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: _MessageButtonDetail(
+                            idea: idea,
+                            accent: accent,
+                          ),
+                        ),
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: _FollowButton(idea: idea, accent: accent),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(right: 16),
+                        padding: const EdgeInsets.only(right: 12),
                         child: _BookmarkButton(idea: idea, accent: accent),
                       ),
                     ],
@@ -865,6 +874,82 @@ class _DocumentRequestButtonState extends State<_DocumentRequestButton>
           child: Center(
             child: Icon(
               Icons.file_copy_outlined,
+              color: Colors.white.withOpacity(0.6),
+              size: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Message Button Detail (Collaborator) ────────────────────────────────────
+
+class _MessageButtonDetail extends StatefulWidget {
+  const _MessageButtonDetail({required this.idea, required this.accent});
+
+  final StartupIdea idea;
+  final Color accent;
+
+  @override
+  State<_MessageButtonDetail> createState() => _MessageButtonDetailState();
+}
+
+class _MessageButtonDetailState extends State<_MessageButtonDetail>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap() async {
+    await _ctrl.forward();
+    await _ctrl.reverse();
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) => SendShortMessageDialog(
+        ideaId: widget.idea.id,
+        ideaTitle: widget.idea.title,
+        founderName: widget.idea.founder['name'] ?? 'Founder',
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _onTap,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFF161616),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.message_outlined,
               color: Colors.white.withOpacity(0.6),
               size: 20,
             ),
