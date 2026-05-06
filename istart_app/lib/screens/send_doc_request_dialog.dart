@@ -9,10 +9,10 @@ class SendDocRequestDialog extends StatefulWidget {
   final String ideaTitle;
 
   const SendDocRequestDialog({
-    Key? key,
+    super.key,
     required this.ideaId,
     required this.ideaTitle,
-  }) : super(key: key);
+  });
 
   @override
   State<SendDocRequestDialog> createState() => _SendDocRequestDialogState();

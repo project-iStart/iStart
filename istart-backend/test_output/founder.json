@@ -1,0 +1,9 @@
+﻿{
+    "token":  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjlmYjhmYmUyYzk3NTg3MjNhZjc0ZjViIiwicm9sZSI6ImZvdW5kZXIifSwiaWF0IjoxNzc4MDk0MDE0LCJleHAiOjE3Nzg2OTg4MTR9.TUnvGzb7M-r4jMQ6nJu8AreAIsYUYNZBmFJ9HxtlzO4",
+    "user":  {
+                 "id":  "69fb8fbe2c9758723af74f5b",
+                 "name":  "Founder",
+                 "email":  "founder@example.com",
+                 "role":  "founder"
+             }
+}

@@ -8,11 +8,11 @@ class SendShortMessageDialog extends StatefulWidget {
   final String founderName;
 
   const SendShortMessageDialog({
-    Key? key,
+    super.key,
     required this.ideaId,
     required this.ideaTitle,
     required this.founderName,
-  }) : super(key: key);
+  });
 
   @override
   State<SendShortMessageDialog> createState() => _SendShortMessageDialogState();

@@ -11,10 +11,11 @@ class AppNotification {
     required this.read,
   });
 
-  factory AppNotification.fromJson(Map<String, dynamic> json) => AppNotification(
-    id: json['_id'],
-    message: json['message'],
-    type: json['type'],
-    read: json['read'] ?? false,
-  );
+  factory AppNotification.fromJson(Map<String, dynamic> json) =>
+      AppNotification(
+        id: json['_id'],
+        message: json['message'],
+        type: json['type'],
+        read: json['read'] ?? false,
+      );
 }

@@ -1,0 +1,9 @@
+﻿{
+    "token":  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjlmYjhmYmUyYzk3NTg3MjNhZjc0ZjVkIiwicm9sZSI6ImludmVzdG9yIn0sImlhdCI6MTc3ODA5NDAxNCwiZXhwIjoxNzc4Njk4ODE0fQ.0TfGvT42RkHtOLlEYRK30yRpY89Ht05nrejIQ_2E3Co",
+    "user":  {
+                 "id":  "69fb8fbe2c9758723af74f5d",
+                 "name":  "Investor",
+                 "email":  "investor@example.com",
+                 "role":  "investor"
+             }
+}

@@ -27,12 +27,17 @@ class DiscussionProvider extends ChangeNotifier {
   Future<bool> createThread({
     required String ideaId,
     required String title,
+    List<String>? participants,
   }) async {
     _setLoading(true);
     _error = null;
     try {
-      final data = await _service.createThread(ideaId: ideaId, title: title);
-      final newThread = DiscussionThread.fromJson(data);
+      final raw = await _service.createThread(
+        ideaId: ideaId,
+        title: title,
+        participants: participants,
+      );
+      final newThread = DiscussionThread.fromJson(raw);
       _threads.add(newThread);
       notifyListeners();
       return true;
@@ -88,11 +93,13 @@ class DiscussionProvider extends ChangeNotifier {
   Future<bool> postMessage({
     required String threadId,
     required String content,
+    List<Map<String, dynamic>>? attachments,
   }) async {
     try {
       final data = await _service.postMessage(
         threadId: threadId,
         content: content,
+        attachments: attachments,
       );
       final newMessage = Message.fromJson(data);
       _messages.add(newMessage);

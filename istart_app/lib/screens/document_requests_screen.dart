@@ -9,7 +9,7 @@ import '../providers/idea_provider.dart';
 import '../providers/auth_provider.dart';
 
 class DocumentRequestsScreen extends StatefulWidget {
-  const DocumentRequestsScreen({Key? key}) : super(key: key);
+  const DocumentRequestsScreen({super.key});
 
   @override
   State<DocumentRequestsScreen> createState() => _DocumentRequestsScreenState();

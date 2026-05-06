@@ -4,6 +4,7 @@ import '../models/startup_idea.dart';
 import '../providers/idea_provider.dart';
 import '../providers/auth_provider.dart';
 import '../screens/idea_detail_screen.dart';
+import '../screens/messaging_screen.dart';
 import 'rocket_icon.dart';
 
 class IdeaCard extends StatelessWidget {
@@ -417,18 +418,9 @@ class _MessageButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Message feature - Connect with the founder'),
-            duration: Duration(seconds: 2),
-          ),
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => MessagingScreen(idea: idea)),
         );
-        // TODO: Implement messaging screen
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (context) => MessagingScreen(ideaId: idea.id),
-        //   ),
-        // );
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),

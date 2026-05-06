@@ -7,6 +7,7 @@ class Message {
   final String senderName;
   final String senderEmail;
   final String content;
+  final List<Map<String, dynamic>> attachments;
   final DateTime createdAt;
 
   Message({
@@ -16,6 +17,7 @@ class Message {
     required this.senderName,
     required this.senderEmail,
     required this.content,
+    this.attachments = const [],
     required this.createdAt,
   });
 
@@ -26,6 +28,11 @@ class Message {
     senderName: json['sender']?['name'] ?? 'Unknown',
     senderEmail: json['sender']?['email'] ?? '',
     content: json['content'] ?? '',
+    attachments:
+        (json['attachments'] as List<dynamic>?)
+            ?.map((e) => Map<String, dynamic>.from(e as Map))
+            .toList() ??
+        [],
     createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
   );
 }

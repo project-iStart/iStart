@@ -62,37 +62,57 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (_token == null) return;
     await _service.markAllAsRead(_token!);
     setState(() {
-      _notifications = _notifications.map((n) => NotificationModel(
-        id: n.id,
-        message: n.message,
-        type: n.type,
-        isRead: true,
-        createdAt: n.createdAt,
-        relatedIdea: n.relatedIdea,
-      )).toList();
+      _notifications = _notifications
+          .map(
+            (n) => NotificationModel(
+              id: n.id,
+              message: n.message,
+              type: n.type,
+              isRead: true,
+              createdAt: n.createdAt,
+              relatedIdea: n.relatedIdea,
+            ),
+          )
+          .toList();
     });
     widget.onRead?.call(); // ← added
   }
 
   IconData _iconForType(String type) {
     switch (type) {
-      case 'vote': return Icons.thumb_up_alt_rounded;
-      case 'feedback': return Icons.chat_bubble_rounded;
-      case 'join_request': return Icons.group_add_rounded;
-      case 'doc_request': return Icons.description_rounded;
-      case 'fund_interest': return Icons.monetization_on_rounded;
-      default: return Icons.notifications_rounded;
+      case 'vote':
+        return Icons.thumb_up_alt_rounded;
+      case 'feedback':
+        return Icons.chat_bubble_rounded;
+      case 'message':
+        return Icons.mark_chat_unread_rounded;
+      case 'join_request':
+        return Icons.group_add_rounded;
+      case 'doc_request':
+        return Icons.description_rounded;
+      case 'fund_interest':
+        return Icons.monetization_on_rounded;
+      default:
+        return Icons.notifications_rounded;
     }
   }
 
   Color _colorForType(String type) {
     switch (type) {
-      case 'vote': return const Color(0xFF6366F1);
-      case 'feedback': return const Color(0xFF10B981);
-      case 'join_request': return const Color(0xFF6366F1);
-      case 'doc_request': return const Color(0xFFF59E0B);
-      case 'fund_interest': return const Color(0xFFF59E0B);
-      default: return Colors.grey;
+      case 'vote':
+        return const Color(0xFF6366F1);
+      case 'feedback':
+        return const Color(0xFF10B981);
+      case 'message':
+        return const Color(0xFF6366F1);
+      case 'join_request':
+        return const Color(0xFF6366F1);
+      case 'doc_request':
+        return const Color(0xFFF59E0B);
+      case 'fund_interest':
+        return const Color(0xFFF59E0B);
+      default:
+        return Colors.grey;
     }
   }
 
@@ -130,30 +150,30 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF6366F1)),
+            )
           : _notifications.isEmpty
-              ? _buildEmpty()
-              : RefreshIndicator(
-                  color: const Color(0xFF6366F1),
-                  onRefresh: _load,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: _notifications.length,
-                    separatorBuilder: (_, _) => const Divider(
-                      color: Color(0xFF1C1C1C),
-                      height: 1,
-                    ),
-                    itemBuilder: (context, i) {
-                      final n = _notifications[i];
-                      return _NotificationTile(
-                        notification: n,
-                        icon: _iconForType(n.type),
-                        iconColor: _colorForType(n.type),
-                        onTap: () => _markAsRead(n, i),
-                      );
-                    },
-                  ),
-                ),
+          ? _buildEmpty()
+          : RefreshIndicator(
+              color: const Color(0xFF6366F1),
+              onRefresh: _load,
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: _notifications.length,
+                separatorBuilder: (_, _) =>
+                    const Divider(color: Color(0xFF1C1C1C), height: 1),
+                itemBuilder: (context, i) {
+                  final n = _notifications[i];
+                  return _NotificationTile(
+                    notification: n,
+                    icon: _iconForType(n.type),
+                    iconColor: _colorForType(n.type),
+                    onTap: () => _markAsRead(n, i),
+                  );
+                },
+              ),
+            ),
     );
   }
 
@@ -162,7 +182,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_off_rounded, size: 56, color: Colors.grey[700]),
+          Icon(
+            Icons.notifications_off_rounded,
+            size: 56,
+            color: Colors.grey[700],
+          ),
           const SizedBox(height: 16),
           Text(
             'No alerts yet',
@@ -232,7 +256,9 @@ class _NotificationTile extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'DM Sans',
                       fontSize: 14,
-                      color: notification.isRead ? Colors.grey[400] : Colors.white,
+                      color: notification.isRead
+                          ? Colors.grey[400]
+                          : Colors.white,
                       fontWeight: notification.isRead
                           ? FontWeight.w400
                           : FontWeight.w500,

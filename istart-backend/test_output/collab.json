@@ -1,0 +1,9 @@
+﻿{
+    "token":  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjlmYjhmYmUyYzk3NTg3MjNhZjc0ZjVjIiwicm9sZSI6ImNvbGxhYm9yYXRvciJ9LCJpYXQiOjE3NzgwOTQwMTQsImV4cCI6MTc3ODY5ODgxNH0.dwJRMVK7l-HTcmXPoUpl2XjIurWR1rxljGhcA8LwnUo",
+    "user":  {
+                 "id":  "69fb8fbe2c9758723af74f5c",
+                 "name":  "Collab",
+                 "email":  "collab@example.com",
+                 "role":  "collaborator"
+             }
+}
