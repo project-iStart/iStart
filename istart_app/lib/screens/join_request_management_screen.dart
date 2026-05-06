@@ -127,7 +127,7 @@ class _JoinRequestManagementScreenState
                                 child: ListView.separated(
                                   padding: const EdgeInsets.all(16),
                                   itemCount: pendingRequests.length,
-                                  separatorBuilder: (_, __) =>
+                                  separatorBuilder: (_, _) =>
                                       const SizedBox(height: 12),
                                   itemBuilder: (context, i) =>
                                       _JoinRequestCard(
@@ -144,7 +144,7 @@ class _JoinRequestManagementScreenState
                         : ListView.separated(
                             padding: const EdgeInsets.all(16),
                             itemCount: approvedRequests.length,
-                            separatorBuilder: (_, __) =>
+                            separatorBuilder: (_, _) =>
                                 const SizedBox(height: 12),
                             itemBuilder: (context, i) => _JoinRequestCard(
                               request: approvedRequests[i],

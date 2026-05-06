@@ -14,7 +14,7 @@ class DiscussionService {
       data: {
         'startupIdeaId': ideaId,
         'title': title,
-        if (participants != null) 'participants': participants,
+        'participants': ?participants,
       },
     );
     return res.data;
@@ -36,7 +36,7 @@ class DiscussionService {
       '/discussion/$threadId/messages',
       data: {
         'content': content,
-        if (attachments != null) 'attachments': attachments,
+        'attachments': ?attachments,
       },
     );
     return res.data;

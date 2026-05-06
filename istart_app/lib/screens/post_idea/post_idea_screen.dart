@@ -168,7 +168,7 @@ class _PostIdeaScreenState extends State<PostIdeaScreen> {
                 fontFamily: 'DM Sans')),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           dropdownColor: const Color(0xFF1A1A2E),
           style: const TextStyle(color: Colors.white, fontFamily: 'DM Sans'),
           decoration: InputDecoration(

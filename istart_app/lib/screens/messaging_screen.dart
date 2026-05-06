@@ -57,8 +57,9 @@ class _MessagingScreenState extends State<MessagingScreen> {
   Future<void> _createCommonThread() async {
     final currentUser = context.read<AuthProvider>().user;
     final participantIds = _extractParticipantIds();
-    if (currentUser != null && !participantIds.contains(currentUser.id))
+    if (currentUser != null && !participantIds.contains(currentUser.id)) {
       participantIds.add(currentUser.id);
+    }
 
     final ok = await context.read<DiscussionProvider>().createThread(
       ideaId: widget.idea.id,
@@ -132,7 +133,7 @@ class _MessagingScreenState extends State<MessagingScreen> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: threads.length + 1,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, i) {
                 if (i == 0) {
                   return ElevatedButton(

@@ -56,9 +56,9 @@ class IdeaService {
     final res = await dio.post('/ideas', data: {
       'title': title,
       'description': description,
-      if (problemStatement != null) 'problemStatement': problemStatement,
-      if (category != null) 'category': category,
-      if (stage != null) 'stage': stage,
+      'problemStatement': ?problemStatement,
+      'category': ?category,
+      'stage': ?stage,
     });
     return StartupIdea.fromJson(res.data);
   }
@@ -75,9 +75,9 @@ class IdeaService {
     final res = await dio.put('/ideas/$ideaId', data: {
       'title': title,
       'description': description,
-      if (problemStatement != null) 'problemStatement': problemStatement,
-      if (category != null) 'category': category,
-      if (stage != null) 'stage': stage,
+      'problemStatement': ?problemStatement,
+      'category': ?category,
+      'stage': ?stage,
     });
     return StartupIdea.fromJson(res.data);
   }

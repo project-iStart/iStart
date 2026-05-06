@@ -296,7 +296,7 @@ class _DiscussionsTabState extends State<_DiscussionsTab> {
                       child: ListView.separated(
                         padding: const EdgeInsets.all(16),
                         itemCount: threads.length,
-                        separatorBuilder: (_, __) =>
+                        separatorBuilder: (_, _) =>
                             const SizedBox(height: 12),
                         itemBuilder: (context, i) => _ThreadCard(
                           thread: threads[i],
@@ -494,7 +494,7 @@ class _TeamMembersTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: teamMembers.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, i) {
         final member = teamMembers[i];
         final memberMap =

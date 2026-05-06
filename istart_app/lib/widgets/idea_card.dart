@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import '../models/startup_idea.dart';
 import '../providers/idea_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/discussion_provider.dart';
 import '../screens/idea_detail_screen.dart';
 import '../screens/profile/public_profile_screen.dart';
+import '../screens/messaging_screen.dart';
 import 'rocket_icon.dart';
 
 class IdeaCard extends StatelessWidget {
@@ -47,7 +49,9 @@ class IdeaCard extends StatelessWidget {
                   if (current.category != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: accent.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(20),
@@ -154,8 +158,10 @@ class IdeaCard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF59E0B).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
@@ -167,8 +173,11 @@ class IdeaCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Icon(Icons.bolt_rounded,
-                            color: Color(0xFFF59E0B), size: 13),
+                        Icon(
+                          Icons.bolt_rounded,
+                          color: Color(0xFFF59E0B),
+                          size: 13,
+                        ),
                         SizedBox(width: 4),
                         Text(
                           'Funding interest received',
@@ -188,8 +197,11 @@ class IdeaCard extends StatelessWidget {
               Row(
                 children: [
                   if (current.stage != null) ...[
-                    Icon(Icons.circle,
-                        size: 6, color: Colors.white.withOpacity(0.25)),
+                    Icon(
+                      Icons.circle,
+                      size: 6,
+                      color: Colors.white.withOpacity(0.25),
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       current.stage!,
@@ -206,7 +218,9 @@ class IdeaCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF59E0B).withOpacity(0.12),
                         borderRadius: BorderRadius.circular(20),
@@ -223,6 +237,10 @@ class IdeaCard extends StatelessWidget {
                     ),
                   ] else if (userRole == 'collaborator') ...[
                     _MessageButton(idea: current, accent: accent),
+                  ] else if (userRole == 'founder') ...[
+                    // Check if this is the founder's own idea
+                    if (_isFounderOwnIdea(current, context))
+                      _MessageButton(idea: current, accent: accent),
                   ],
                   const SizedBox(width: 12),
                   _VoteButton(idea: current, accent: accent),
@@ -233,6 +251,15 @@ class IdeaCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Check if the current user is the founder of this idea
+  bool _isFounderOwnIdea(StartupIdea idea, BuildContext context) {
+    final currentUserId = context.read<AuthProvider>().user?.id ?? '';
+    final founderIdFromMap =
+        (idea.founder['_id'] ?? idea.founder['id'] ?? '') as String;
+    return currentUserId == founderIdFromMap ||
+        currentUserId == idea.founder['_id'];
   }
 }
 
@@ -256,33 +283,45 @@ class _FundButton extends StatelessWidget {
                 builder: (_) => AlertDialog(
                   backgroundColor: const Color(0xFF1A1A1A),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   title: const Text(
                     'Express Funding Interest',
                     style: TextStyle(
-                        fontFamily: 'Sora', color: Colors.white, fontSize: 16),
+                      fontFamily: 'Sora',
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
                   ),
                   content: const Text(
                     'Your contact details will be shared with the Founder. The actual deal happens outside the platform.',
                     style: TextStyle(
-                        fontFamily: 'DM Sans',
-                        color: Colors.white70,
-                        fontSize: 13),
+                      fontFamily: 'DM Sans',
+                      color: Colors.white70,
+                      fontSize: 13,
+                    ),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel',
-                          style: TextStyle(
-                              fontFamily: 'DM Sans', color: Colors.white54)),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          color: Colors.white54,
+                        ),
+                      ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Confirm',
-                          style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              color: Color(0xFFF59E0B),
-                              fontWeight: FontWeight.w600)),
+                      child: const Text(
+                        'Confirm',
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          color: Color(0xFFF59E0B),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -294,14 +333,15 @@ class _FundButton extends StatelessWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content:
-                            Text('Funding interest sent to the Founder!')),
+                      content: Text('Funding interest sent to the Founder!'),
+                    ),
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(e.toString())));
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               }
             },
@@ -369,9 +409,13 @@ class _VoteButtonState extends State<_VoteButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 160));
-    _scale = Tween<double>(begin: 1.0, end: 1.35).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.35,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -384,8 +428,7 @@ class _VoteButtonState extends State<_VoteButton>
     await _ctrl.forward();
     await _ctrl.reverse();
     if (!mounted) return;
-    final currentUserId =
-        context.read<AuthProvider>().user?.id ?? '';
+    final currentUserId = context.read<AuthProvider>().user?.id ?? '';
     context.read<IdeaProvider>().toggleVote(widget.idea.id, currentUserId);
   }
 
@@ -425,21 +468,46 @@ class _VoteButtonState extends State<_VoteButton>
 
 // ─── Message Button ───────────────────────────────────────────────────────────
 
-class _MessageButton extends StatelessWidget {
+class _MessageButton extends StatefulWidget {
   const _MessageButton({required this.idea, required this.accent});
 
   final StartupIdea idea;
   final Color accent;
 
   @override
+  State<_MessageButton> createState() => _MessageButtonState();
+}
+
+class _MessageButtonState extends State<_MessageButton> {
+  int _threadCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThreadCount();
+  }
+
+  Future<void> _loadThreadCount() async {
+    try {
+      final provider = context.read<IdeaProvider>();
+      // Trigger discussion provider to fetch threads
+      await context.read<DiscussionProvider>().fetchThreadsForIdea(
+        widget.idea.id,
+      );
+      setState(() {
+        _threadCount = context.read<DiscussionProvider>().threads.length;
+      });
+    } catch (_) {
+      // Silently fail
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Message feature - Connect with the founder'),
-            duration: Duration(seconds: 2),
-          ),
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => MessagingScreen(idea: widget.idea)),
         );
       },
       child: AnimatedContainer(
@@ -448,22 +516,54 @@ class _MessageButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: accent.withOpacity(0.4)),
+          border: Border.all(color: widget.accent.withOpacity(0.4)),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
           children: [
-            Icon(Icons.mail_outline_rounded, color: accent, size: 15),
-            const SizedBox(width: 4),
-            Text(
-              'Message',
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: accent,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.mail_outline_rounded,
+                  color: widget.accent,
+                  size: 15,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Message',
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: widget.accent,
+                  ),
+                ),
+              ],
             ),
+            if (_threadCount > 0)
+              Positioned(
+                right: 2,
+                top: -4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.accent,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$_threadCount',
+                    style: const TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -492,9 +592,13 @@ class _BookmarkButtonState extends State<_BookmarkButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 160));
-    _scale = Tween<double>(begin: 1.0, end: 1.3).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -529,8 +633,11 @@ class _BookmarkButtonState extends State<_BookmarkButton>
 }
 
 class _BookmarkIcon extends StatelessWidget {
-  const _BookmarkIcon(
-      {required this.color, required this.filled, this.size = 20});
+  const _BookmarkIcon({
+    required this.color,
+    required this.filled,
+    this.size = 20,
+  });
 
   final Color color;
   final bool filled;
@@ -599,9 +706,13 @@ class _FollowButtonState extends State<_FollowButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 160));
-    _scale = Tween<double>(begin: 1.0, end: 1.2).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
