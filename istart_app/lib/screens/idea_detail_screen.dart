@@ -8,6 +8,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/rocket_icon.dart';
 import 'send_doc_request_dialog.dart';
 import 'send_short_message_dialog.dart';
+import 'profile/public_profile_screen.dart';
 
 class IdeaDetailScreen extends StatefulWidget {
   final String ideaId;
@@ -40,319 +41,288 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
       body: SafeArea(
         child: loading
             ? Center(
-                child: CircularProgressIndicator(color: accent, strokeWidth: 2),
-              )
+                child:
+                    CircularProgressIndicator(color: accent, strokeWidth: 2))
             : idea == null
-            ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      size: 48,
-                      color: accent.withOpacity(0.4),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Idea not found',
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    backgroundColor: const Color(0xFF0D0D0D),
-                    surfaceTintColor: Colors.transparent,
-                    elevation: 0,
-                    leading: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF161616),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white.withOpacity(0.7),
-                            size: 16,
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.info_outline_rounded,
+                            size: 48, color: accent.withOpacity(0.4)),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Idea not found',
+                          style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    actions: [
-                      if (role == 'investor')
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: _DocumentRequestButton(
-                            idea: idea,
-                            accent: accent,
-                          ),
-                        ),
-                      if (role == 'collaborator')
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: _MessageButtonDetail(
-                            idea: idea,
-                            accent: accent,
-                          ),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _FollowButton(idea: idea, accent: accent),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: _BookmarkButton(idea: idea, accent: accent),
-                      ),
-                    ],
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Category badge
-                          if (idea.category != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
+                  )
+                : CustomScrollView(
+                    slivers: [
+                      SliverAppBar(
+                        backgroundColor: const Color(0xFF0D0D0D),
+                        surfaceTintColor: Colors.transparent,
+                        elevation: 0,
+                        leading: GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
-                                color: accent.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(20),
+                                color: const Color(0xFF161616),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Text(
-                                idea.category!,
-                                style: TextStyle(
-                                  fontFamily: 'DM Sans',
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: accent,
-                                ),
+                              child: Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                color: Colors.white.withOpacity(0.7),
+                                size: 16,
                               ),
-                            ),
-                          const SizedBox(height: 16),
-
-                          // Title
-                          Text(
-                            idea.title,
-                            style: const TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              height: 1.2,
                             ),
                           ),
-                          const SizedBox(height: 16),
-
-                          // Meta info
-                          Row(
+                        ),
+                        actions: [
+                          if (role == 'investor')
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: _DocumentRequestButton(
+                                  idea: idea, accent: accent),
+                            ),
+                          if (role == 'collaborator')
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: _MessageButtonDetail(
+                                  idea: idea, accent: accent),
+                            ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _FollowButton(idea: idea, accent: accent),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child:
+                                _BookmarkButton(idea: idea, accent: accent),
+                          ),
+                        ],
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (idea.stage != null) ...[
+                              if (idea.category != null)
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
+                                      horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF161616),
-                                    borderRadius: BorderRadius.circular(8),
+                                    color: accent.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
-                                    idea.stage!,
-                                    style: TextStyle(
-                                      fontFamily: 'DM Sans',
-                                      fontSize: 12,
-                                      color: Colors.white.withOpacity(0.6),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
-                              if (idea.fundingInterest)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFFF59E0B,
-                                    ).withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Text(
-                                    'Seeking Funding',
+                                    idea.category!,
                                     style: TextStyle(
                                       fontFamily: 'DM Sans',
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFFF59E0B),
+                                      color: accent,
                                     ),
                                   ),
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Vote section
-                          _VoteSection(idea: idea, accent: accent),
-                          const SizedBox(height: 24),
-
-                          // Description section
-                          _SectionTitle(title: 'Description', accent: accent),
-                          const SizedBox(height: 12),
-                          Text(
-                            idea.description,
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(0.7),
-                              height: 1.6,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Problem statement section
-                          if (idea.problemStatement != null) ...[
-                            _SectionTitle(
-                              title: 'Problem Statement',
-                              accent: accent,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              idea.problemStatement!,
-                              style: TextStyle(
-                                fontFamily: 'DM Sans',
-                                fontSize: 14,
-                                color: Colors.white.withOpacity(0.7),
-                                height: 1.6,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                          ],
-
-                          // Founder section
-                          _SectionTitle(title: 'Founder', accent: accent),
-                          const SizedBox(height: 12),
-                          _FounderCard(founder: idea.founder, accent: accent),
-                          const SizedBox(height: 24),
-
-                          // Team section
-                          if (idea.teamMembers.isNotEmpty) ...[
-                            _SectionTitle(
-                              title: 'Team Members',
-                              accent: accent,
-                            ),
-                            const SizedBox(height: 12),
-                            ...idea.teamMembers.map((member) {
-                              final memberMap = member is Map
-                                  ? member as Map<String, dynamic>
-                                  : {'name': member.toString()}
-                                        as Map<String, dynamic>;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _TeamMemberCard(
-                                  member: memberMap,
-                                  accent: accent,
-                                ),
-                              );
-                            }),
-                            const SizedBox(height: 24),
-                          ],
-
-                          // Pitch deck section
-                          if (idea.pitchDeckUrl != null) ...[
-                            _SectionTitle(title: 'Pitch Deck', accent: accent),
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF161616),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.07),
-                                  width: 0.5,
+                              const SizedBox(height: 16),
+                              Text(
+                                idea.title,
+                                style: const TextStyle(
+                                  fontFamily: 'Sora',
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  height: 1.2,
                                 ),
                               ),
-                              child: Row(
+                              const SizedBox(height: 16),
+                              Row(
                                 children: [
-                                  Icon(
-                                    Icons.picture_as_pdf_outlined,
-                                    color: accent,
-                                    size: 24,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'View Pitch Deck',
-                                          style: TextStyle(
-                                            fontFamily: 'DM Sans',
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
+                                  if (idea.stage != null) ...[
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF161616),
+                                        borderRadius:
+                                            BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        idea.stage!,
+                                        style: TextStyle(
+                                          fontFamily: 'DM Sans',
+                                          fontSize: 12,
+                                          color:
+                                              Colors.white.withOpacity(0.6),
                                         ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'PDF Document',
-                                          style: TextStyle(
-                                            fontFamily: 'DM Sans',
-                                            fontSize: 12,
-                                            color: Colors.white.withOpacity(
-                                              0.4,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    color: Colors.white.withOpacity(0.3),
-                                    size: 16,
-                                  ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  if (idea.fundingInterest)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF59E0B)
+                                            .withOpacity(0.12),
+                                        borderRadius:
+                                            BorderRadius.circular(8),
+                                      ),
+                                      child: const Text(
+                                        'Seeking Funding',
+                                        style: TextStyle(
+                                          fontFamily: 'DM Sans',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFFF59E0B),
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(height: 24),
-                          ],
-
-                          // Community score
-                          _SectionTitle(
-                            title: 'Community Score',
-                            accent: accent,
+                              const SizedBox(height: 24),
+                              _VoteSection(idea: idea, accent: accent),
+                              const SizedBox(height: 24),
+                              _SectionTitle(
+                                  title: 'Description', accent: accent),
+                              const SizedBox(height: 12),
+                              Text(
+                                idea.description,
+                                style: TextStyle(
+                                  fontFamily: 'DM Sans',
+                                  fontSize: 14,
+                                  color: Colors.white.withOpacity(0.7),
+                                  height: 1.6,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              if (idea.problemStatement != null) ...[
+                                _SectionTitle(
+                                    title: 'Problem Statement',
+                                    accent: accent),
+                                const SizedBox(height: 12),
+                                Text(
+                                  idea.problemStatement!,
+                                  style: TextStyle(
+                                    fontFamily: 'DM Sans',
+                                    fontSize: 14,
+                                    color: Colors.white.withOpacity(0.7),
+                                    height: 1.6,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                              _SectionTitle(
+                                  title: 'Founder', accent: accent),
+                              const SizedBox(height: 12),
+                              _FounderCard(
+                                  founder: idea.founder, accent: accent),
+                              const SizedBox(height: 24),
+                              if (idea.teamMembers.isNotEmpty) ...[
+                                _SectionTitle(
+                                    title: 'Team Members', accent: accent),
+                                const SizedBox(height: 12),
+                                ...idea.teamMembers.map((member) {
+                                  final memberMap = member is Map
+                                      ? member as Map<String, dynamic>
+                                      : {'name': member.toString()}
+                                            as Map<String, dynamic>;
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.only(bottom: 12),
+                                    child: _TeamMemberCard(
+                                      member: memberMap,
+                                      accent: accent,
+                                    ),
+                                  );
+                                }),
+                                const SizedBox(height: 24),
+                              ],
+                              if (idea.pitchDeckUrl != null) ...[
+                                _SectionTitle(
+                                    title: 'Pitch Deck', accent: accent),
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF161616),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.07),
+                                      width: 0.5,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                          Icons.picture_as_pdf_outlined,
+                                          color: accent,
+                                          size: 24),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'View Pitch Deck',
+                                              style: TextStyle(
+                                                fontFamily: 'DM Sans',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'PDF Document',
+                                              style: TextStyle(
+                                                fontFamily: 'DM Sans',
+                                                fontSize: 12,
+                                                color: Colors.white
+                                                    .withOpacity(0.4),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.arrow_forward_ios_rounded,
+                                        color:
+                                            Colors.white.withOpacity(0.3),
+                                        size: 16,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                              _SectionTitle(
+                                  title: 'Community Score', accent: accent),
+                              const SizedBox(height: 12),
+                              _CommunityScoreBar(
+                                  score: idea.communityScore, accent: accent),
+                              const SizedBox(height: 40),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          _CommunityScoreBar(
-                            score: idea.communityScore,
-                            accent: accent,
-                          ),
-                          const SizedBox(height: 40),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
       ),
     );
   }
@@ -390,13 +360,9 @@ class _VoteSectionState extends State<_VoteSection>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 160),
-    );
-    _scale = Tween<double>(
-      begin: 1.0,
-      end: 1.2,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+        vsync: this, duration: const Duration(milliseconds: 160));
+    _scale = Tween<double>(begin: 1.0, end: 1.2)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -438,7 +404,7 @@ class _VoteSectionState extends State<_VoteSection>
               const SizedBox(height: 4),
               Text(
                 '${widget.idea.voteCount} upvotes',
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -454,9 +420,7 @@ class _VoteSectionState extends State<_VoteSection>
               scale: _scale,
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
+                    horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: widget.idea.isVoted
                       ? widget.accent
@@ -467,7 +431,9 @@ class _VoteSectionState extends State<_VoteSection>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     RocketIcon(
-                      color: widget.idea.isVoted ? Colors.white : widget.accent,
+                      color: widget.idea.isVoted
+                          ? Colors.white
+                          : widget.accent,
                       size: 18,
                       filled: widget.idea.isVoted,
                     ),
@@ -506,7 +472,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: TextStyle(
+      style: const TextStyle(
         fontFamily: 'Sora',
         fontSize: 18,
         fontWeight: FontWeight.w700,
@@ -526,87 +492,102 @@ class _FounderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = founder['name'] ?? 'Unknown';
-    final email = founder['email'];
-    final role = founder['role'];
+    final name = (founder['name'] ?? 'Unknown') as String;
+    final email = founder['email'] as String?;
+    final role = founder['role'] as String?;
+    final founderId =
+        (founder['_id'] ?? founder['id'] ?? '') as String;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161616),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: accent.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: founderId.isEmpty
+          ? null
+          : () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => PublicProfileScreen(
+                    userId: founderId,
+                    userName: name,
+                  ),
                 ),
-                child: Center(
-                  child: Text(
-                    name.isNotEmpty ? name[0].toUpperCase() : '?',
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: accent,
-                    ),
+              );
+            },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+              color: Colors.white.withOpacity(0.07), width: 0.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: accent.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  name.isNotEmpty ? name[0].toUpperCase() : '?',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: accent,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (role != null)
                     Text(
-                      name,
-                      style: const TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                      role,
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.5),
                       ),
                     ),
-                    if (role != null)
-                      Text(
-                        role,
-                        style: TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.5),
-                        ),
+                  if (email != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      email,
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 12,
+                        color: accent,
                       ),
+                    ),
                   ],
-                ),
-              ),
-            ],
-          ),
-          if (email != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              email,
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 12,
-                color: accent,
+                ],
               ),
             ),
+            if (founderId.isNotEmpty)
+              Icon(Icons.arrow_forward_ios_rounded,
+                  color: Colors.white.withOpacity(0.2), size: 14),
           ],
-        ],
+        ),
       ),
     );
   }
 }
 
-// ─── Team Member Card ────────────────────────────────────────────────────────
+// ─── Team Member Card ─────────────────────────────────────────────────────────
 
 class _TeamMemberCard extends StatelessWidget {
   const _TeamMemberCard({required this.member, required this.accent});
@@ -616,68 +597,87 @@ class _TeamMemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = member['name'] ?? 'Team Member';
-    final role = member['role'];
-    final expertise = member['expertise'];
+    final name = (member['name'] ?? 'Team Member') as String;
+    final role = member['role'] as String?;
+    final expertise = member['expertise'] as String?;
+    final memberId = (member['_id'] ?? member['id'] ?? '') as String;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161616),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: accent.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: TextStyle(
-                  fontFamily: 'Sora',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: accent,
+    return GestureDetector(
+      onTap: memberId.isEmpty
+          ? null
+          : () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => PublicProfileScreen(
+                    userId: memberId,
+                    userName: name,
+                  ),
+                ),
+              );
+            },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+              color: Colors.white.withOpacity(0.07), width: 0.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: accent.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  name.isNotEmpty ? name[0].toUpperCase() : '?',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: accent,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                if (role != null || expertise != null)
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    [
-                      ?role,
-                      ?expertise,
-                    ].where((e) => e.isNotEmpty).join(' • '),
-                    style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 11,
-                      color: Colors.white.withOpacity(0.4),
+                    name,
+                    style: const TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
                     ),
                   ),
-              ],
+                  if (role != null || expertise != null)
+                    Text(
+                      [
+                        if (role != null) role,
+                        if (expertise != null) expertise,
+                      ].where((e) => e.isNotEmpty).join(' • '),
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 11,
+                        color: Colors.white.withOpacity(0.4),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+            if (memberId.isNotEmpty)
+              Icon(Icons.arrow_forward_ios_rounded,
+                  color: Colors.white.withOpacity(0.2), size: 14),
+          ],
+        ),
       ),
     );
   }
@@ -693,7 +693,7 @@ class _CommunityScoreBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxScore = 100;
+    const maxScore = 100;
     final percentage = (score / maxScore).clamp(0.0, 1.0);
 
     return Column(
@@ -757,13 +757,9 @@ class _BookmarkButtonState extends State<_BookmarkButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 160),
-    );
-    _scale = Tween<double>(
-      begin: 1.0,
-      end: 1.3,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+        vsync: this, duration: const Duration(milliseconds: 160));
+    _scale = Tween<double>(begin: 1.0, end: 1.3)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -809,7 +805,7 @@ class _BookmarkButtonState extends State<_BookmarkButton>
   }
 }
 
-// ─── Document Request Button ─────────────────────────────────────────────────
+// ─── Document Request Button ──────────────────────────────────────────────────
 
 class _DocumentRequestButton extends StatefulWidget {
   const _DocumentRequestButton({required this.idea, required this.accent});
@@ -818,7 +814,8 @@ class _DocumentRequestButton extends StatefulWidget {
   final Color accent;
 
   @override
-  State<_DocumentRequestButton> createState() => _DocumentRequestButtonState();
+  State<_DocumentRequestButton> createState() =>
+      _DocumentRequestButtonState();
 }
 
 class _DocumentRequestButtonState extends State<_DocumentRequestButton>
@@ -830,13 +827,9 @@ class _DocumentRequestButtonState extends State<_DocumentRequestButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 160),
-    );
-    _scale = Tween<double>(
-      begin: 1.0,
-      end: 1.15,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+        vsync: this, duration: const Duration(milliseconds: 160));
+    _scale = Tween<double>(begin: 1.0, end: 1.15)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -872,11 +865,8 @@ class _DocumentRequestButtonState extends State<_DocumentRequestButton>
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
-            child: Icon(
-              Icons.file_copy_outlined,
-              color: Colors.white.withOpacity(0.6),
-              size: 20,
-            ),
+            child: Icon(Icons.file_copy_outlined,
+                color: Colors.white.withOpacity(0.6), size: 20),
           ),
         ),
       ),
@@ -884,7 +874,7 @@ class _DocumentRequestButtonState extends State<_DocumentRequestButton>
   }
 }
 
-// ─── Message Button Detail (Collaborator) ────────────────────────────────────
+// ─── Message Button Detail ────────────────────────────────────────────────────
 
 class _MessageButtonDetail extends StatefulWidget {
   const _MessageButtonDetail({required this.idea, required this.accent});
@@ -905,13 +895,9 @@ class _MessageButtonDetailState extends State<_MessageButtonDetail>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 160),
-    );
-    _scale = Tween<double>(
-      begin: 1.0,
-      end: 1.15,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+        vsync: this, duration: const Duration(milliseconds: 160));
+    _scale = Tween<double>(begin: 1.0, end: 1.15)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -948,11 +934,8 @@ class _MessageButtonDetailState extends State<_MessageButtonDetail>
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
-            child: Icon(
-              Icons.message_outlined,
-              color: Colors.white.withOpacity(0.6),
-              size: 20,
-            ),
+            child: Icon(Icons.message_outlined,
+                color: Colors.white.withOpacity(0.6), size: 20),
           ),
         ),
       ),
@@ -981,13 +964,9 @@ class _FollowButtonState extends State<_FollowButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 160),
-    );
-    _scale = Tween<double>(
-      begin: 1.0,
-      end: 1.15,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+        vsync: this, duration: const Duration(milliseconds: 160));
+    _scale = Tween<double>(begin: 1.0, end: 1.15)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override

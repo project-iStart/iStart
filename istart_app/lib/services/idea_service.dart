@@ -1,8 +1,10 @@
-import 'api_client.dart';
+// lib/services/idea_service.dart
+
 import '../models/startup_idea.dart';
+import 'api_client.dart';
 
 class IdeaService {
-  Future<List<StartupIdea>> getIdeas({
+  Future<List<StartupIdea>> fetchIdeas({
     String? category,
     String? stage,
     String? search,
@@ -25,32 +27,10 @@ class IdeaService {
     return StartupIdea.fromJson(res.data);
   }
 
-  Future<StartupIdea> createIdea({
-    required String title,
-    required String description,
-    String? problemStatement,
-    String? category,
-    String? stage,
-    String? pitchDeckUrl,
-  }) async {
+  Future<Map<String, dynamic>> toggleVote(String ideaId) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post(
-      '/ideas',
-      data: {
-        'title': title,
-        'description': description,
-        'problemStatement': ?problemStatement,
-        'category': ?category,
-        'stage': ?stage,
-        'pitchDeckUrl': ?pitchDeckUrl,
-      },
-    );
-    return StartupIdea.fromJson(res.data);
-  }
-
-  Future<void> deleteIdea(String id) async {
-    final dio = await ApiClient.getClient();
-    await dio.delete('/ideas/$id');
+    final res = await dio.post('/votes', data: {'ideaId': ideaId});
+    return Map<String, dynamic>.from(res.data as Map);
   }
 
   Future<Map<String, dynamic>> toggleBookmark(String ideaId) async {
@@ -59,33 +39,51 @@ class IdeaService {
     return Map<String, dynamic>.from(res.data as Map);
   }
 
-  /// POST /votes — backend checks if vote exists:
-  /// - If no vote → creates it + fires notification to founder (first time only)
-  /// - If vote exists → removes it (no notification on re-vote)
-  Future<Map<String, dynamic>> toggleVote(String ideaId) async {
-    final dio = await ApiClient.getClient();
-    final res = await dio.post('/votes', data: {'ideaId': ideaId});
-    return Map<String, dynamic>.from(res.data as Map);
-  }
-
-  /// Express funding interest in an idea (investors only)
   Future<Map<String, dynamic>> fundInterest(String ideaId) async {
     final dio = await ApiClient.getClient();
     final res = await dio.post('/ideas/$ideaId/fund-interest');
-    return res.data as Map<String, dynamic>;
+    return Map<String, dynamic>.from(res.data as Map);
   }
 
-  /// Follow or unfollow an idea (investors tracking ideas)
-  Future<Map<String, dynamic>> toggleFollow(String ideaId) async {
+  Future<StartupIdea> createIdea({
+    required String title,
+    required String description,
+    String? problemStatement,
+    String? category,
+    String? stage,
+  }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.post('/ideas/$ideaId/follow');
-    return res.data as Map<String, dynamic>;
+    final res = await dio.post('/ideas', data: {
+      'title': title,
+      'description': description,
+      if (problemStatement != null) 'problemStatement': problemStatement,
+      if (category != null) 'category': category,
+      if (stage != null) 'stage': stage,
+    });
+    return StartupIdea.fromJson(res.data);
   }
 
-  /// Get follower count for an idea
-  Future<int> getFollowerCount(String ideaId) async {
+  Future<StartupIdea> updateIdea({
+    required String ideaId,
+    required String title,
+    required String description,
+    String? problemStatement,
+    String? category,
+    String? stage,
+  }) async {
     final dio = await ApiClient.getClient();
-    final res = await dio.get('/ideas/$ideaId/followers/count');
-    return res.data['count'] as int? ?? 0;
+    final res = await dio.put('/ideas/$ideaId', data: {
+      'title': title,
+      'description': description,
+      if (problemStatement != null) 'problemStatement': problemStatement,
+      if (category != null) 'category': category,
+      if (stage != null) 'stage': stage,
+    });
+    return StartupIdea.fromJson(res.data);
+  }
+
+  Future<void> deleteIdea(String ideaId) async {
+    final dio = await ApiClient.getClient();
+    await dio.delete('/ideas/$ideaId');
   }
 }

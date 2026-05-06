@@ -1,7 +1,6 @@
-// lib/providers/idea_provider.dart
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/startup_idea.dart';
 import '../services/idea_service.dart';
 
@@ -9,14 +8,13 @@ class IdeaProvider extends ChangeNotifier {
   static const String _bookmarkedIdeaIdsKey = 'bookmarked_idea_ids';
   static const String _votedIdeaIdsKey = 'voted_idea_ids';
   static const String _followedIdeaIdsKey = 'followed_idea_ids';
+
   final IdeaService _service = IdeaService();
 
   List<StartupIdea> _ideas = [];
   StartupIdea? _selectedIdea;
   bool _loading = false;
   String? _error;
-
-  // Filter state
   String _searchQuery = '';
   String? _selectedCategory;
   String? _selectedStage;
@@ -30,31 +28,25 @@ class IdeaProvider extends ChangeNotifier {
   StartupIdea? get selectedIdea => _selectedIdea;
   bool get loading => _loading;
   String? get error => _error;
-
-  // Filter getters
   String get searchQuery => _searchQuery;
   String? get selectedCategory => _selectedCategory;
   String? get selectedStage => _selectedStage;
 
-  /// Returns filtered list based on current search and filter state
   List<StartupIdea> get _filteredIdeas {
     return _ideas.where((idea) {
-      // Search filter
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
-        if (!idea.title.toLowerCase().contains(query) &&
-            !idea.description.toLowerCase().contains(query) &&
-            !(idea.category?.toLowerCase().contains(query) ?? false)) {
-          return false;
-        }
+        final matchesSearch =
+            idea.title.toLowerCase().contains(query) ||
+            idea.description.toLowerCase().contains(query) ||
+            (idea.category?.toLowerCase().contains(query) ?? false);
+        if (!matchesSearch) return false;
       }
 
-      // Category filter
       if (_selectedCategory != null && idea.category != _selectedCategory) {
         return false;
       }
 
-      // Stage filter
       if (_selectedStage != null && idea.stage != _selectedStage) {
         return false;
       }
@@ -63,30 +55,26 @@ class IdeaProvider extends ChangeNotifier {
     }).toList();
   }
 
-  void _setLoading(bool val) {
-    _loading = val;
+  void _setLoading(bool value) {
+    _loading = value;
     notifyListeners();
   }
 
-  /// Update search query and refresh filtered results
   void setSearchQuery(String query) {
     _searchQuery = query;
     notifyListeners();
   }
 
-  /// Update selected category filter
   void setSelectedCategory(String? category) {
     _selectedCategory = category;
     notifyListeners();
   }
 
-  /// Update selected stage filter
   void setSelectedStage(String? stage) {
     _selectedStage = stage;
     notifyListeners();
   }
 
-  /// Clear all filters
   void clearFilters() {
     _searchQuery = '';
     _selectedCategory = null;
@@ -124,6 +112,19 @@ class IdeaProvider extends ChangeNotifier {
     await prefs.setStringList(_followedIdeaIdsKey, ids.toList());
   }
 
+  StartupIdea _applyStoredFlags(
+    StartupIdea idea, {
+    required Set<String> bookmarkedIds,
+    required Set<String> votedIds,
+    required Set<String> followedIds,
+  }) {
+    return idea.copyWith(
+      isBookmarked: idea.isBookmarked || bookmarkedIds.contains(idea.id),
+      isVoted: idea.isVoted || votedIds.contains(idea.id),
+      isFollowing: idea.isFollowing || followedIds.contains(idea.id),
+    );
+  }
+
   Future<void> fetchIdeas({
     String? category,
     String? stage,
@@ -132,30 +133,25 @@ class IdeaProvider extends ChangeNotifier {
     _setLoading(true);
     _error = null;
     try {
-      final storedBookmarkedIds = await _getStoredBookmarkedIds();
-      final storedVotedIds = await _getStoredVotedIds();
-      final storedFollowedIds = await _getStoredFollowedIds();
-      final fetchedIdeas = await _service.getIdeas(
+      final bookmarkedIds = await _getStoredBookmarkedIds();
+      final votedIds = await _getStoredVotedIds();
+      final followedIds = await _getStoredFollowedIds();
+      final fetchedIdeas = await _service.fetchIdeas(
         category: category,
         stage: stage,
         search: search,
       );
-      _ideas = fetchedIdeas.map((idea) {
-        var updatedIdea = idea;
-        // Restore bookmarked status from local storage
-        if (storedBookmarkedIds.contains(idea.id) && !idea.isBookmarked) {
-          updatedIdea = updatedIdea.copyWith(isBookmarked: true);
-        }
-        // Restore voted status from local storage
-        if (storedVotedIds.contains(idea.id) && !idea.isVoted) {
-          updatedIdea = updatedIdea.copyWith(isVoted: true);
-        }
-        // Restore following status from local storage
-        if (storedFollowedIds.contains(idea.id) && !idea.isFollowing) {
-          updatedIdea = updatedIdea.copyWith(isFollowing: true);
-        }
-        return updatedIdea;
-      }).toList();
+
+      _ideas = fetchedIdeas
+          .map(
+            (idea) => _applyStoredFlags(
+              idea,
+              bookmarkedIds: bookmarkedIds,
+              votedIds: votedIds,
+              followedIds: followedIds,
+            ),
+          )
+          .toList();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -167,30 +163,19 @@ class IdeaProvider extends ChangeNotifier {
     _setLoading(true);
     _error = null;
     try {
-      final fetched = await _service.getIdeaById(id);
-      final storedBookmarkedIds = await _getStoredBookmarkedIds();
-      final storedVotedIds = await _getStoredVotedIds();
-      final storedFollowedIds = await _getStoredFollowedIds();
-      var syncedIdea = fetched;
-
-      // Restore bookmarked status from local storage
-      if (storedBookmarkedIds.contains(fetched.id) && !fetched.isBookmarked) {
-        syncedIdea = syncedIdea.copyWith(isBookmarked: true);
-      }
-      // Restore voted status from local storage
-      if (storedVotedIds.contains(fetched.id) && !fetched.isVoted) {
-        syncedIdea = syncedIdea.copyWith(isVoted: true);
-      }
-      // Restore following status from local storage
-      if (storedFollowedIds.contains(fetched.id) && !fetched.isFollowing) {
-        syncedIdea = syncedIdea.copyWith(isFollowing: true);
-      }
+      final fetchedIdea = await _service.getIdeaById(id);
+      final syncedIdea = _applyStoredFlags(
+        fetchedIdea,
+        bookmarkedIds: await _getStoredBookmarkedIds(),
+        votedIds: await _getStoredVotedIds(),
+        followedIds: await _getStoredFollowedIds(),
+      );
 
       _selectedIdea = syncedIdea;
 
-      final idx = _ideas.indexWhere((idea) => idea.id == id);
-      if (idx != -1) {
-        _ideas[idx] = syncedIdea;
+      final index = _ideas.indexWhere((idea) => idea.id == id);
+      if (index != -1) {
+        _ideas[index] = syncedIdea;
       }
     } catch (e) {
       _error = e.toString();
@@ -199,27 +184,69 @@ class IdeaProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> createIdea(Map<String, dynamic> data) async {
-    _setLoading(true);
-    try {
-      await _service.createIdea(
-        title: data['title'],
-        description: data['description'],
-      );
-      await fetchIdeas();
-      return true;
-    } catch (e) {
-      _error = e.toString();
-      return false;
-    } finally {
-      _setLoading(false);
-    }
+  Future<void> createIdea({
+    required String title,
+    required String description,
+    String? problemStatement,
+    String? category,
+    String? stage,
+  }) async {
+    final idea = await _service.createIdea(
+      title: title,
+      description: description,
+      problemStatement: problemStatement,
+      category: category,
+      stage: stage,
+    );
+
+    _ideas.insert(0, idea);
+    notifyListeners();
   }
 
-  Future<bool> deleteIdea(String id) async {
+  Future<void> updateIdea({
+    required String ideaId,
+    required String title,
+    required String description,
+    String? problemStatement,
+    String? category,
+    String? stage,
+  }) async {
+    final updatedIdea = await _service.updateIdea(
+      ideaId: ideaId,
+      title: title,
+      description: description,
+      problemStatement: problemStatement,
+      category: category,
+      stage: stage,
+    );
+
+    final bookmarkedIds = await _getStoredBookmarkedIds();
+    final votedIds = await _getStoredVotedIds();
+    final followedIds = await _getStoredFollowedIds();
+    final syncedIdea = _applyStoredFlags(
+      updatedIdea,
+      bookmarkedIds: bookmarkedIds,
+      votedIds: votedIds,
+      followedIds: followedIds,
+    );
+
+    final index = _ideas.indexWhere((idea) => idea.id == ideaId);
+    if (index != -1) {
+      _ideas[index] = syncedIdea;
+    }
+    if (_selectedIdea?.id == ideaId) {
+      _selectedIdea = syncedIdea;
+    }
+    notifyListeners();
+  }
+
+  Future<bool> deleteIdea(String ideaId) async {
     try {
-      await _service.deleteIdea(id);
-      _ideas.removeWhere((i) => i.id == id);
+      await _service.deleteIdea(ideaId);
+      _ideas.removeWhere((idea) => idea.id == ideaId);
+      if (_selectedIdea?.id == ideaId) {
+        _selectedIdea = null;
+      }
       notifyListeners();
       return true;
     } catch (e) {
@@ -229,25 +256,24 @@ class IdeaProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleBookmark(String id) async {
+  Future<void> toggleBookmark(String ideaId) async {
     try {
-      final result = await _service.toggleBookmark(id);
+      final result = await _service.toggleBookmark(ideaId);
       final isBookmarked = result['bookmarked'] == true;
-      final storedBookmarkedIds = await _getStoredBookmarkedIds();
+
+      final storedIds = await _getStoredBookmarkedIds();
       if (isBookmarked) {
-        storedBookmarkedIds.add(id);
+        storedIds.add(ideaId);
       } else {
-        storedBookmarkedIds.remove(id);
+        storedIds.remove(ideaId);
       }
-      await _saveStoredBookmarkedIds(storedBookmarkedIds);
+      await _saveStoredBookmarkedIds(storedIds);
 
-      final idx = _ideas.indexWhere((i) => i.id == id);
-      if (idx != -1) {
-        final current = _ideas[idx];
-        _ideas[idx] = current.copyWith(isBookmarked: isBookmarked);
+      final index = _ideas.indexWhere((idea) => idea.id == ideaId);
+      if (index != -1) {
+        _ideas[index] = _ideas[index].copyWith(isBookmarked: isBookmarked);
       }
-
-      if (_selectedIdea?.id == id) {
+      if (_selectedIdea?.id == ideaId) {
         _selectedIdea = _selectedIdea!.copyWith(isBookmarked: isBookmarked);
       }
 
@@ -258,30 +284,37 @@ class IdeaProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleVote(String id, [String? currentUserId]) async {
+  Future<void> toggleVote(String ideaId, [String? currentUserId]) async {
+    final index = _ideas.indexWhere((idea) => idea.id == ideaId);
+    if (index != -1 && currentUserId != null) {
+      final founderId = _ideas[index].founder['_id']?.toString();
+      if (founderId == currentUserId) {
+        return;
+      }
+    }
+
     try {
-      final result = await _service.toggleVote(id);
+      final result = await _service.toggleVote(ideaId);
       final isVoted = result['isVoted'] == true;
       final voteCount = result['voteCount'] is int
           ? result['voteCount'] as int
           : int.tryParse('${result['voteCount']}') ?? 0;
 
-      // Update local storage for voted ideas
-      final storedVotedIds = await _getStoredVotedIds();
+      final storedIds = await _getStoredVotedIds();
       if (isVoted) {
-        storedVotedIds.add(id);
+        storedIds.add(ideaId);
       } else {
-        storedVotedIds.remove(id);
+        storedIds.remove(ideaId);
       }
-      await _saveStoredVotedIds(storedVotedIds);
+      await _saveStoredVotedIds(storedIds);
 
-      final idx = _ideas.indexWhere((i) => i.id == id);
-      if (idx != -1) {
-        final current = _ideas[idx];
-        _ideas[idx] = current.copyWith(isVoted: isVoted, voteCount: voteCount);
+      if (index != -1) {
+        _ideas[index] = _ideas[index].copyWith(
+          isVoted: isVoted,
+          voteCount: voteCount,
+        );
       }
-
-      if (_selectedIdea?.id == id) {
+      if (_selectedIdea?.id == ideaId) {
         _selectedIdea = _selectedIdea!.copyWith(
           isVoted: isVoted,
           voteCount: voteCount,
@@ -295,33 +328,23 @@ class IdeaProvider extends ChangeNotifier {
     }
   }
 
-  void clearError() {
-    _error = null;
-    notifyListeners();
-  }
-
-  /// Toggle follow status for an idea (investors tracking ideas)
-  Future<void> toggleFollow(String id) async {
+  Future<void> toggleFollow(String ideaId) async {
     try {
-      final result = await _service.toggleFollow(id);
-      final isFollowing = result['isFollowing'] == true;
+      final storedIds = await _getStoredFollowedIds();
+      final isFollowing = !storedIds.contains(ideaId);
 
-      // Update local storage for followed ideas
-      final storedFollowedIds = await _getStoredFollowedIds();
       if (isFollowing) {
-        storedFollowedIds.add(id);
+        storedIds.add(ideaId);
       } else {
-        storedFollowedIds.remove(id);
+        storedIds.remove(ideaId);
       }
-      await _saveStoredFollowedIds(storedFollowedIds);
+      await _saveStoredFollowedIds(storedIds);
 
-      final idx = _ideas.indexWhere((i) => i.id == id);
-      if (idx != -1) {
-        final current = _ideas[idx];
-        _ideas[idx] = current.copyWith(isFollowing: isFollowing);
+      final index = _ideas.indexWhere((idea) => idea.id == ideaId);
+      if (index != -1) {
+        _ideas[index] = _ideas[index].copyWith(isFollowing: isFollowing);
       }
-
-      if (_selectedIdea?.id == id) {
+      if (_selectedIdea?.id == ideaId) {
         _selectedIdea = _selectedIdea!.copyWith(isFollowing: isFollowing);
       }
 
@@ -333,24 +356,53 @@ class IdeaProvider extends ChangeNotifier {
   }
 
   Future<void> fundInterest(String ideaId) async {
-    // optimistic update
-    final idx = _ideas.indexWhere((i) => i.id == ideaId);
-    if (idx == -1) return;
+    final index = _ideas.indexWhere((idea) => idea.id == ideaId);
+    if (index == -1) return;
 
-    final old = _ideas[idx];
-    _ideas[idx] = old.copyWith(
+    final previousIdea = _ideas[index];
+    _ideas[index] = previousIdea.copyWith(
       hasFundingInterest: true,
-      fundingInterestCount: old.fundingInterestCount + 1,
+      fundingInterestCount: previousIdea.fundingInterestCount + 1,
     );
+    if (_selectedIdea?.id == ideaId) {
+      _selectedIdea = _selectedIdea!.copyWith(
+        hasFundingInterest: true,
+        fundingInterestCount: _selectedIdea!.fundingInterestCount + 1,
+      );
+    }
     notifyListeners();
 
     try {
-      await _service.fundInterest(ideaId);
+      final result = await _service.fundInterest(ideaId);
+      final fundingInterestCount = result['fundingInterestCount'] is int
+          ? result['fundingInterestCount'] as int
+          : int.tryParse('${result['fundingInterestCount']}') ??
+              _ideas[index].fundingInterestCount;
+      final hasFundingInterest = result['hasFundingInterest'] == true;
+
+      _ideas[index] = _ideas[index].copyWith(
+        hasFundingInterest: hasFundingInterest,
+        fundingInterestCount: fundingInterestCount,
+      );
+      if (_selectedIdea?.id == ideaId) {
+        _selectedIdea = _selectedIdea!.copyWith(
+          hasFundingInterest: hasFundingInterest,
+          fundingInterestCount: fundingInterestCount,
+        );
+      }
+      notifyListeners();
     } catch (e) {
-      // rollback
-      _ideas[idx] = old;
+      _ideas[index] = previousIdea;
+      if (_selectedIdea?.id == ideaId) {
+        _selectedIdea = previousIdea;
+      }
       notifyListeners();
       rethrow;
     }
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
   }
 }
