@@ -37,12 +37,18 @@ class _MessagingScreenState extends State<MessagingScreen> {
   List<String> _extractParticipantIds() {
     final ids = <String>[];
     try {
-      if (widget.idea.founder is Map && widget.idea.founder['_id'] != null) {
-        ids.add(widget.idea.founder['_id'].toString());
+      final founder = widget.idea.founder;
+      if (founder['_id'] != null) {
+        ids.add(founder['_id'].toString());
       }
       for (var tm in widget.idea.teamMembers) {
-        if (tm is String) ids.add(tm);
-        if (tm is Map && tm['_id'] != null) ids.add(tm['_id'].toString());
+        if (tm is String) {
+          ids.add(tm);
+        } else if (tm is Map) {
+          if (tm['_id'] != null) {
+            ids.add(tm['_id'].toString());
+          }
+        }
       }
     } catch (_) {}
     return ids;
@@ -191,7 +197,7 @@ class _MessagingScreenState extends State<MessagingScreen> {
                             if (m.content.isNotEmpty) Text(m.content),
                             for (var a in m.attachments)
                               Text(
-                                'Attachment: ${a['filename'] ?? a['url']}',
+                                "Attachment: ${a['filename'] ?? a['url']}",
                                 style: const TextStyle(fontSize: 12),
                               ),
                             Text(
