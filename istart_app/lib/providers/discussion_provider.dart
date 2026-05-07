@@ -55,7 +55,7 @@ class DiscussionProvider extends ChangeNotifier {
     _error = null;
     try {
       final data = await _service.getThreadsForIdea(ideaId);
-      _threads = (data)
+      _threads = data
           .map((e) => DiscussionThread.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
@@ -77,10 +77,9 @@ class DiscussionProvider extends ChangeNotifier {
     _error = null;
     try {
       final data = await _service.getMessages(threadId);
-      _messages = (data)
+      _messages = data
           .map((e) => Message.fromJson(e as Map<String, dynamic>))
           .toList();
-      // Sort by creation time (oldest first)
       _messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     } catch (e) {
       _error = e.toString();
@@ -93,13 +92,11 @@ class DiscussionProvider extends ChangeNotifier {
   Future<bool> postMessage({
     required String threadId,
     required String content,
-    List<Map<String, dynamic>>? attachments,
   }) async {
     try {
       final data = await _service.postMessage(
         threadId: threadId,
         content: content,
-        attachments: attachments,
       );
       final newMessage = Message.fromJson(data);
       _messages.add(newMessage);
@@ -109,6 +106,37 @@ class DiscussionProvider extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
       return false;
+    }
+  }
+
+  /// Get existing thread for idea or create one
+  Future<DiscussionThread?> getOrCreateThread({
+    required String ideaId,
+    required String title,
+  }) async {
+    _setLoading(true);
+    _error = null;
+    try {
+      final data = await _service.getThreadsForIdea(ideaId);
+      if (data.isNotEmpty) {
+        final thread = DiscussionThread.fromJson(
+          data.first as Map<String, dynamic>,
+        );
+        _threads = [thread];
+        notifyListeners();
+        return thread;
+      }
+      final raw = await _service.createThread(ideaId: ideaId, title: title);
+      final newThread = DiscussionThread.fromJson(raw);
+      _threads = [newThread];
+      notifyListeners();
+      return newThread;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    } finally {
+      _setLoading(false);
     }
   }
 

@@ -1,5 +1,3 @@
-// lib/services/discussion_service.dart
-
 import 'api_client.dart';
 
 class DiscussionService {
@@ -9,9 +7,12 @@ class DiscussionService {
     List<String>? participants,
   }) async {
     final dio = await ApiClient.getClient();
-    final data = {'startupIdeaId': ideaId, 'title': title};
+    final data = <String, dynamic>{
+      'startupIdeaId': ideaId,
+      'title': title,
+    };
     if (participants != null && participants.isNotEmpty) {
-      data['participants'] = participants as String;
+      data['participants'] = participants;
     }
     final res = await dio.post('/discussion', data: data);
     return res.data;
@@ -26,14 +27,12 @@ class DiscussionService {
   Future<Map<String, dynamic>> postMessage({
     required String threadId,
     required String content,
-    List<Map<String, dynamic>>? attachments,
   }) async {
     final dio = await ApiClient.getClient();
-    final data = {'content': content};
-    if (attachments != null && attachments.isNotEmpty) {
-      data['attachments'] = attachments as String;
-    }
-    final res = await dio.post('/discussion/$threadId/messages', data: data);
+    final res = await dio.post(
+      '/discussion/$threadId/messages',
+      data: {'content': content},
+    );
     return res.data;
   }
 

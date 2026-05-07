@@ -68,6 +68,16 @@ class StartupIdea {
     );
   }
 
+  // Helper method
+  List<String> get teamMemberIds {
+    return teamMembers.map((m) {
+      if (m is Map) {
+        return (m['_id'] ?? m['id'] ?? '').toString();
+      }
+      return m.toString();
+    }).where((id) => id.isNotEmpty).toList();
+  }
+
   StartupIdea copyWith({
     String? id,
     String? title,
