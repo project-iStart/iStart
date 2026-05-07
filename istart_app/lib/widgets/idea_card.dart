@@ -14,7 +14,6 @@ import '../screens/feedback/feedback_sheet.dart';
 import 'rocket_icon.dart';
 import '../screens/idea_detail_screen.dart';
 
-
 class IdeaCard extends StatelessWidget {
   const IdeaCard({super.key, required this.idea, required this.accent});
 
@@ -36,27 +35,37 @@ class IdeaCard extends StatelessWidget {
         title: const Text(
           'Delete Idea',
           style: TextStyle(
-              fontFamily: 'Sora', color: Colors.white, fontSize: 16),
+            fontFamily: 'Sora',
+            color: Colors.white,
+            fontSize: 16,
+          ),
         ),
         content: Text(
           'Are you sure you want to delete "${idea.title}"? This cannot be undone.',
           style: const TextStyle(
-              fontFamily: 'DM Sans', color: Colors.white70, fontSize: 13),
+            fontFamily: 'DM Sans',
+            color: Colors.white70,
+            fontSize: 13,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel',
-                style: TextStyle(
-                    fontFamily: 'DM Sans', color: Colors.white54)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontFamily: 'DM Sans', color: Colors.white54),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete',
-                style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    color: Colors.redAccent,
-                    fontWeight: FontWeight.w600)),
+            child: const Text(
+              'Delete',
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                color: Colors.redAccent,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -66,15 +75,15 @@ class IdeaCard extends StatelessWidget {
     try {
       await context.read<IdeaProvider>().deleteIdea(idea.id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Idea deleted')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Idea deleted')));
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     }
   }
@@ -83,9 +92,9 @@ class IdeaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final userRole = context.watch<AuthProvider>().user?.role ?? '';
     final current = context.watch<IdeaProvider>().ideas.firstWhere(
-          (i) => i.id == idea.id,
-          orElse: () => idea,
-        );
+      (i) => i.id == idea.id,
+      orElse: () => idea,
+    );
     final isOwn = _isOwnIdea(context, current);
 
     return Container(
@@ -114,7 +123,9 @@ class IdeaCard extends StatelessWidget {
                   if (current.category != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: accent.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(20),
@@ -139,8 +150,7 @@ class IdeaCard extends StatelessWidget {
                       onEdit: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) =>
-                                PostIdeaScreen(idea: current),
+                            builder: (_) => PostIdeaScreen(idea: current),
                           ),
                         );
                       },
@@ -183,8 +193,9 @@ class IdeaCard extends StatelessWidget {
               // Founder row
               GestureDetector(
                 onTap: () {
-                  final founderId = (current.founder['_id'] ??
-                      current.founder['id'] ?? '') as String;
+                  final founderId =
+                      (current.founder['_id'] ?? current.founder['id'] ?? '')
+                          as String;
                   final founderName =
                       (current.founder['name'] ?? 'Founder') as String;
                   if (founderId.isEmpty) return;
@@ -206,9 +217,10 @@ class IdeaCard extends StatelessWidget {
                       child: Text(
                         (current.founder['name'] ?? '?')[0].toUpperCase(),
                         style: TextStyle(
-                            fontSize: 10,
-                            color: accent,
-                            fontFamily: 'Sora'),
+                          fontSize: 10,
+                          color: accent,
+                          fontFamily: 'Sora',
+                        ),
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -229,16 +241,16 @@ class IdeaCard extends StatelessWidget {
               const SizedBox(height: 10),
 
               // Funding interest badge
-              if (current.fundingInterestCount > 0 ||
-                  current.fundingInterest)
+              if (current.fundingInterestCount > 0 || current.fundingInterest)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
-                      color:
-                          const Color(0xFFF59E0B).withOpacity(0.12),
+                      color: const Color(0xFFF59E0B).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: const Color(0xFFF59E0B).withOpacity(0.4),
@@ -248,8 +260,11 @@ class IdeaCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Icon(Icons.bolt_rounded,
-                            color: Color(0xFFF59E0B), size: 13),
+                        Icon(
+                          Icons.bolt_rounded,
+                          color: Color(0xFFF59E0B),
+                          size: 13,
+                        ),
                         SizedBox(width: 4),
                         Text(
                           'Funding interest received',
@@ -269,9 +284,11 @@ class IdeaCard extends StatelessWidget {
               Row(
                 children: [
                   if (current.stage != null) ...[
-                    Icon(Icons.circle,
-                        size: 6,
-                        color: Colors.white.withOpacity(0.25)),
+                    Icon(
+                      Icons.circle,
+                      size: 6,
+                      color: Colors.white.withOpacity(0.25),
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       current.stage!,
@@ -282,13 +299,33 @@ class IdeaCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                  if (current.communityScore > 0) ...[
+                    const SizedBox(width: 10),
+                    Icon(
+                      Icons.star_rounded,
+                      size: 13,
+                      color: const Color(0xFFF59E0B).withOpacity(0.8),
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      '${current.communityScore}',
+                      style: const TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 12,
+                        color: Color(0xFFF59E0B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                   const Spacer(),
                   if (userRole == 'investor') ...[
                     _FundButton(idea: current),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF59E0B).withOpacity(0.12),
                         borderRadius: BorderRadius.circular(20),
@@ -373,8 +410,11 @@ class _IdeaMenuButton extends StatelessWidget {
     return PopupMenuButton<String>(
       color: const Color(0xFF1A1A1A),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      icon: Icon(Icons.more_vert_rounded,
-          color: Colors.white.withOpacity(0.4), size: 20),
+      icon: Icon(
+        Icons.more_vert_rounded,
+        color: Colors.white.withOpacity(0.4),
+        size: 20,
+      ),
       onSelected: (val) {
         if (val == 'edit') onEdit();
         if (val == 'delete') onDelete();
@@ -386,11 +426,14 @@ class _IdeaMenuButton extends StatelessWidget {
             children: [
               Icon(Icons.edit_outlined, color: accent, size: 16),
               const SizedBox(width: 10),
-              Text('Edit',
-                  style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      color: accent,
-                      fontSize: 14)),
+              Text(
+                'Edit',
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  color: accent,
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
         ),
@@ -398,14 +441,20 @@ class _IdeaMenuButton extends StatelessWidget {
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete_outline_rounded,
-                  color: Colors.redAccent, size: 16),
+              Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.redAccent,
+                size: 16,
+              ),
               SizedBox(width: 10),
-              Text('Delete',
-                  style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      color: Colors.redAccent,
-                      fontSize: 14)),
+              Text(
+                'Delete',
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  color: Colors.redAccent,
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
         ),
@@ -432,61 +481,70 @@ class _FundButton extends StatelessWidget {
                 builder: (_) => AlertDialog(
                   backgroundColor: const Color(0xFF1A1A1A),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  title: const Text('Express Funding Interest',
-                      style: TextStyle(
-                          fontFamily: 'Sora',
-                          color: Colors.white,
-                          fontSize: 16)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  title: const Text(
+                    'Express Funding Interest',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
                   content: const Text(
                     'Your contact details will be shared with the Founder. The actual deal happens outside the platform.',
                     style: TextStyle(
-                        fontFamily: 'DM Sans',
-                        color: Colors.white70,
-                        fontSize: 13),
+                      fontFamily: 'DM Sans',
+                      color: Colors.white70,
+                      fontSize: 13,
+                    ),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel',
-                          style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              color: Colors.white54)),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          color: Colors.white54,
+                        ),
+                      ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Confirm',
-                          style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              color: Color(0xFFF59E0B),
-                              fontWeight: FontWeight.w600)),
+                      child: const Text(
+                        'Confirm',
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          color: Color(0xFFF59E0B),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               );
               if (confirm != true) return;
               try {
-                await context
-                    .read<IdeaProvider>()
-                    .fundInterest(idea.id);
+                await context.read<IdeaProvider>().fundInterest(idea.id);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content:
-                            Text('Funding interest sent to the Founder!')),
+                      content: Text('Funding interest sent to the Founder!'),
+                    ),
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(e.toString())));
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               }
             },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: funded
               ? const Color(0xFFF59E0B).withOpacity(0.15)
@@ -547,9 +605,13 @@ class _VoteButtonState extends State<_VoteButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 160));
-    _scale = Tween<double>(begin: 1.0, end: 1.35).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.35,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -622,13 +684,12 @@ class _MessageButtonState extends State<_MessageButton> {
 
   Future<void> _loadThreadCount() async {
     try {
-      await context
-          .read<DiscussionProvider>()
-          .fetchThreadsForIdea(widget.idea.id);
+      await context.read<DiscussionProvider>().fetchThreadsForIdea(
+        widget.idea.id,
+      );
       if (mounted) {
         setState(() {
-          _threadCount =
-              context.read<DiscussionProvider>().threads.length;
+          _threadCount = context.read<DiscussionProvider>().threads.length;
         });
       }
     } catch (_) {}
@@ -639,34 +700,37 @@ class _MessageButtonState extends State<_MessageButton> {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (_) => MessagingScreen(idea: widget.idea)),
+          MaterialPageRoute(builder: (_) => MessagingScreen(idea: widget.idea)),
         );
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          border:
-              Border.all(color: widget.accent.withOpacity(0.4)),
+          border: Border.all(color: widget.accent.withOpacity(0.4)),
         ),
         child: Stack(
           children: [
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.mail_outline_rounded,
-                    color: widget.accent, size: 15),
+                Icon(
+                  Icons.mail_outline_rounded,
+                  color: widget.accent,
+                  size: 15,
+                ),
                 const SizedBox(width: 4),
-                Text('Message',
-                    style: TextStyle(
-                        fontFamily: 'DM Sans',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: widget.accent)),
+                Text(
+                  'Message',
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: widget.accent,
+                  ),
+                ),
               ],
             ),
             if (_threadCount > 0)
@@ -675,17 +739,22 @@ class _MessageButtonState extends State<_MessageButton> {
                 top: -4,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 4, vertical: 2),
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: widget.accent,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text('$_threadCount',
-                      style: const TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white)),
+                  child: Text(
+                    '$_threadCount',
+                    style: const TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -715,9 +784,13 @@ class _BookmarkButtonState extends State<_BookmarkButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 160));
-    _scale = Tween<double>(begin: 1.0, end: 1.3).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -752,8 +825,11 @@ class _BookmarkButtonState extends State<_BookmarkButton>
 }
 
 class _BookmarkIcon extends StatelessWidget {
-  const _BookmarkIcon(
-      {required this.color, required this.filled, this.size = 20});
+  const _BookmarkIcon({
+    required this.color,
+    required this.filled,
+    this.size = 20,
+  });
   final Color color;
   final bool filled;
   final double size;

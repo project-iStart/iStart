@@ -4,7 +4,19 @@ const auth = require('../middleware/auth');
 const optionalAuth = require('../middleware/optionalAuth');
 const StartupIdea = require('../models/StartupIdea');
 const Vote = require('../models/Vote');
+const Feedback = require('../models/Feedback');
 const Notification = require('../models/Notification');
+
+// helper — compute avg rating for a list of idea IDs
+async function getCommunityScores(ideaIds) {
+  const feedbacks = await Feedback.aggregate([
+    { $match: { startupIdea: { $in: ideaIds } } },
+    { $group: { _id: '$startupIdea', avg: { $avg: '$rating' } } },
+  ]);
+  const map = {};
+  feedbacks.forEach(f => { map[f._id.toString()] = Math.round(f.avg * 10) / 10; });
+  return map;
+}
 
 // GET /api/ideas — browse all ideas
 router.get('/', optionalAuth, async (req, res) => {
@@ -40,20 +52,22 @@ router.get('/', optionalAuth, async (req, res) => {
 
       fundedSet = new Set(
         ideas
-          .filter(i =>
-            i.fundingInterests?.some(f => f.investor.toString() === userId)
-          )
+          .filter(i => i.fundingInterests?.some(f => f.investor.toString() === userId))
           .map(i => i._id.toString())
       );
     }
 
     const ideaIds = ideas.map(i => i._id);
+
     const voteCounts = await Vote.aggregate([
       { $match: { startupIdea: { $in: ideaIds } } },
       { $group: { _id: '$startupIdea', count: { $sum: 1 } } },
     ]);
     const voteCountMap = {};
     voteCounts.forEach(v => { voteCountMap[v._id.toString()] = v.count; });
+
+    // Community score
+    const communityScoreMap = await getCommunityScores(ideaIds);
 
     const result = ideas.map(idea => ({
       ...idea.toObject(),
@@ -62,6 +76,7 @@ router.get('/', optionalAuth, async (req, res) => {
       isBookmarked: bookmarkedSet.has(idea._id.toString()),
       fundingInterestCount: idea.fundingInterests?.length ?? 0,
       hasFundingInterest: fundedSet.has(idea._id.toString()),
+      communityScore: communityScoreMap[idea._id.toString()] ?? 0,
     }));
 
     res.json(result);
@@ -95,6 +110,10 @@ router.get('/:id', optionalAuth, async (req, res) => {
 
     const voteCount = await Vote.countDocuments({ startupIdea: idea._id });
 
+    // Community score
+    const scoreMap = await getCommunityScores([idea._id]);
+    const communityScore = scoreMap[idea._id.toString()] ?? 0;
+
     res.json({
       ...idea.toObject(),
       voteCount,
@@ -102,6 +121,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
       isBookmarked,
       fundingInterestCount: idea.fundingInterests?.length ?? 0,
       hasFundingInterest,
+      communityScore,
     });
   } catch (err) {
     console.error(err);
