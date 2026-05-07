@@ -23,10 +23,7 @@ import '../../screens/profile/public_profile_screen.dart';
 class IdeaDetailScreen extends StatefulWidget {
   final String ideaId;
 
-  const IdeaDetailScreen({
-    super.key,
-    required this.ideaId,
-  });
+  const IdeaDetailScreen({super.key, required this.ideaId});
 
   @override
   State<IdeaDetailScreen> createState() => _IdeaDetailScreenState();
@@ -58,12 +55,13 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final idea = context.watch<IdeaProvider>().ideas.firstWhere(
-          (i) => i.id == widget.ideaId,
-          orElse: () => _idea!,
-        );
+      (i) => i.id == widget.ideaId,
+      orElse: () => _idea!,
+    );
 
-    final feedbacks =
-        context.watch<FeedbackProvider>().feedbackFor(widget.ideaId);
+    final feedbacks = context.watch<FeedbackProvider>().feedbackFor(
+      widget.ideaId,
+    );
 
     final user = context.watch<AuthProvider>().user;
     final userRole = user?.role ?? '';
@@ -74,14 +72,12 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
 
     final isOwn = uid == founderId;
 
-    final isTeamMember =
-        isOwn || idea.teamMemberIds.contains(uid);
+    final isTeamMember = isOwn || idea.teamMemberIds.contains(uid);
 
     double avgRating = 0;
     if (feedbacks.isNotEmpty) {
-      avgRating = feedbacks
-              .map((f) => f.rating)
-              .reduce((a, b) => a + b) /
+      avgRating =
+          feedbacks.map((f) => f.rating).reduce((a, b) => a + b) /
           feedbacks.length;
     }
 
@@ -111,10 +107,7 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
       ),
       body: _loading
           ? Center(
-              child: CircularProgressIndicator(
-                color: accent,
-                strokeWidth: 2,
-              ),
+              child: CircularProgressIndicator(color: accent, strokeWidth: 2),
             )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -132,13 +125,6 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                           idea.stage!,
                           color: Colors.white24,
                           textColor: Colors.white54,
-                        ),
-                      ],
-                      if (idea.fundingInterest) ...[
-                        const SizedBox(width: 8),
-                        _Chip(
-                          'Seeking Funding',
-                          color: const Color(0xFFF59E0B),
                         ),
                       ],
                     ],
@@ -165,14 +151,13 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                     onTap: founderId.isEmpty
                         ? null
                         : () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => PublicProfileScreen(
-                                  userId: founderId,
-                                  userName:
-                                      idea.founder['name'] ?? 'Founder',
-                                ),
+                            MaterialPageRoute(
+                              builder: (_) => PublicProfileScreen(
+                                userId: founderId,
+                                userName: idea.founder['name'] ?? 'Founder',
                               ),
                             ),
+                          ),
                     child: Row(
                       children: [
                         CircleAvatar(
@@ -199,7 +184,9 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: accent.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(10),
@@ -274,23 +261,21 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                           final m = member is Map
                               ? member as Map<String, dynamic>
                               : <String, dynamic>{};
-                          final mName =
-                              (m['name'] ?? 'Team Member') as String;
-                          final mId =
-                              (m['_id'] ?? m['id'] ?? '') as String;
+                          final mName = (m['name'] ?? 'Team Member') as String;
+                          final mId = (m['_id'] ?? m['id'] ?? '') as String;
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: GestureDetector(
                               onTap: mId.isEmpty
                                   ? null
                                   : () => Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (_) => PublicProfileScreen(
-                                            userId: mId,
-                                            userName: mName,
-                                          ),
+                                      MaterialPageRoute(
+                                        builder: (_) => PublicProfileScreen(
+                                          userId: mId,
+                                          userName: mName,
                                         ),
                                       ),
+                                    ),
                               child: Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
@@ -305,9 +290,9 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                                   children: [
                                     CircleAvatar(
                                       radius: 16,
-                                      backgroundColor:
-                                          const Color(0xFF10B981)
-                                              .withOpacity(0.15),
+                                      backgroundColor: const Color(
+                                        0xFF10B981,
+                                      ).withOpacity(0.15),
                                       child: Text(
                                         mName[0].toUpperCase(),
                                         style: const TextStyle(
@@ -332,8 +317,7 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                                       Icon(
                                         Icons.arrow_forward_ios_rounded,
                                         size: 12,
-                                        color:
-                                            Colors.white.withOpacity(0.2),
+                                        color: Colors.white.withOpacity(0.2),
                                       ),
                                   ],
                                 ),
@@ -362,8 +346,11 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.picture_as_pdf_outlined,
-                                color: accent, size: 24),
+                            Icon(
+                              Icons.picture_as_pdf_outlined,
+                              color: accent,
+                              size: 24,
+                            ),
                             const SizedBox(width: 12),
                             const Expanded(
                               child: Text(
@@ -430,7 +417,9 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                                 FeedbackSheet.show(context, widget.ideaId),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 5),
+                                horizontal: 12,
+                                vertical: 5,
+                              ),
                               decoration: BoxDecoration(
                                 color: accent.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(20),
@@ -571,9 +560,13 @@ class _VoteSectionState extends State<_VoteSection>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 160));
-    _scale = Tween<double>(begin: 1.0, end: 1.2)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -630,8 +623,10 @@ class _VoteSectionState extends State<_VoteSection>
             child: ScaleTransition(
               scale: _scale,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: widget.idea.isVoted
                       ? widget.accent
@@ -645,9 +640,7 @@ class _VoteSectionState extends State<_VoteSection>
                       widget.idea.isVoted
                           ? Icons.rocket_rounded
                           : Icons.rocket_launch_outlined,
-                      color: widget.idea.isVoted
-                          ? Colors.white
-                          : widget.accent,
+                      color: widget.idea.isVoted ? Colors.white : widget.accent,
                       size: 18,
                     ),
                     const SizedBox(width: 6),
@@ -694,9 +687,13 @@ class _BookmarkButtonState extends State<_BookmarkButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 160));
-    _scale = Tween<double>(begin: 1.0, end: 1.3)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -752,9 +749,13 @@ class _FollowButtonState extends State<_FollowButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 160));
-    _scale = Tween<double>(begin: 1.0, end: 1.15)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -796,11 +797,7 @@ class _Section extends StatelessWidget {
   final Widget child;
   final Widget? trailing;
 
-  const _Section({
-    required this.title,
-    required this.child,
-    this.trailing,
-  });
+  const _Section({required this.title, required this.child, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -836,11 +833,7 @@ class _Chip extends StatelessWidget {
   final Color color;
   final Color textColor;
 
-  const _Chip(
-    this.label, {
-    required this.color,
-    this.textColor = Colors.white,
-  });
+  const _Chip(this.label, {required this.color, this.textColor = Colors.white});
 
   @override
   Widget build(BuildContext context) {
@@ -892,7 +885,9 @@ class _FeedbackTile extends StatelessWidget {
                 child: Text(
                   (feedback.userName ?? '?')[0].toUpperCase(),
                   style: const TextStyle(
-                      fontSize: 10, color: Color(0xFF6366F1)),
+                    fontSize: 10,
+                    color: Color(0xFF6366F1),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1005,9 +1000,13 @@ class _TeamDiscussionButtonState extends State<_TeamDiscussionButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 160));
-    _scale = Tween<double>(begin: 1.0, end: 1.15)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -1024,9 +1023,9 @@ class _TeamDiscussionButtonState extends State<_TeamDiscussionButton>
     setState(() => _loading = true);
 
     final thread = await context.read<DiscussionProvider>().getOrCreateThread(
-          ideaId: widget.idea.id,
-          title: widget.idea.title,
-        );
+      ideaId: widget.idea.id,
+      title: widget.idea.title,
+    );
 
     if (!mounted) return;
     setState(() => _loading = false);
