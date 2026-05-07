@@ -2,8 +2,9 @@ class FeedbackModel {
   final String id;
   final String ideaId;
   final String userId;
+  final String? userName;   // ← add
   final String category;
-  final int rating; // 1-5
+  final int rating;
   final String? comment;
   final DateTime createdAt;
 
@@ -11,6 +12,7 @@ class FeedbackModel {
     required this.id,
     required this.ideaId,
     required this.userId,
+    this.userName,           // ← add
     required this.category,
     required this.rating,
     this.comment,
@@ -18,13 +20,14 @@ class FeedbackModel {
   });
 
   factory FeedbackModel.fromJson(Map<String, dynamic> json) {
+    final user = json['user'];
     return FeedbackModel(
       id: json['_id'] ?? '',
       ideaId: json['startupIdea'] is Map
           ? json['startupIdea']['_id'] ?? ''
           : json['startupIdea'] ?? '',
-      userId:
-          json['user'] is Map ? json['user']['_id'] ?? '' : json['user'] ?? '',
+      userId: user is Map ? user['_id'] ?? '' : user ?? '',
+      userName: user is Map ? user['name'] : null,   // ← add
       category: json['category'] ?? '',
       rating: json['rating'] ?? 1,
       comment: json['comment'],

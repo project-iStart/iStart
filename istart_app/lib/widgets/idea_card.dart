@@ -12,6 +12,8 @@ import '../screens/messaging_screen.dart';
 import '../screens/post_idea/post_idea_screen.dart';
 import '../screens/feedback/feedback_sheet.dart';
 import 'rocket_icon.dart';
+import '../screens/idea_detail_screen.dart';
+
 
 class IdeaCard extends StatelessWidget {
   const IdeaCard({super.key, required this.idea, required this.accent});
