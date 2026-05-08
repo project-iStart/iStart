@@ -18,6 +18,7 @@ import '../../screens/send_doc_request_dialog.dart';
 import '../../screens/send_funding_request_dialog.dart';
 import '../../screens/join_request_screen.dart';
 import '../../screens/join_request_management_screen.dart';
+import '../../screens/investment_request_management_screen.dart';
 import '../../screens/profile/public_profile_screen.dart';
 
 class IdeaDetailScreen extends StatefulWidget {
@@ -55,13 +56,13 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final idea = context.watch<IdeaProvider>().ideas.firstWhere(
-      (i) => i.id == widget.ideaId,
-      orElse: () => _idea!,
-    );
+          (i) => i.id == widget.ideaId,
+          orElse: () => _idea!,
+        );
 
     final feedbacks = context.watch<FeedbackProvider>().feedbackFor(
-      widget.ideaId,
-    );
+          widget.ideaId,
+        );
 
     final user = context.watch<AuthProvider>().user;
     final userRole = user?.role ?? '';
@@ -78,7 +79,7 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
     if (feedbacks.isNotEmpty) {
       avgRating =
           feedbacks.map((f) => f.rating).reduce((a, b) => a + b) /
-          feedbacks.length;
+              feedbacks.length;
     }
 
     final accent = _accentForRole(userRole);
@@ -114,7 +115,7 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Category + Stage — Wrap prevents overflow on long labels
+                  // Category + Stage
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -146,18 +147,18 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Founder row — tappable
+                  // Founder row
                   GestureDetector(
                     onTap: founderId.isEmpty
                         ? null
                         : () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => PublicProfileScreen(
-                                userId: founderId,
-                                userName: idea.founder['name'] ?? 'Founder',
+                              MaterialPageRoute(
+                                builder: (_) => PublicProfileScreen(
+                                  userId: founderId,
+                                  userName: idea.founder['name'] ?? 'Founder',
+                                ),
                               ),
                             ),
-                          ),
                     child: Row(
                       children: [
                         CircleAvatar(
@@ -173,7 +174,6 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // FIX: Flexible prevents long names from overflowing
                         Flexible(
                           child: Text(
                             idea.founder['name'] ?? 'Unknown',
@@ -273,13 +273,13 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                               onTap: mId.isEmpty
                                   ? null
                                   : () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => PublicProfileScreen(
-                                          userId: mId,
-                                          userName: mName,
+                                        MaterialPageRoute(
+                                          builder: (_) => PublicProfileScreen(
+                                            userId: mId,
+                                            userName: mName,
+                                          ),
                                         ),
                                       ),
-                                    ),
                               child: Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
@@ -386,7 +386,6 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                     title: 'Community Score',
                     child: Row(
                       children: [
-                        // FIX: wrap stars in Flexible to prevent overflow
                         Flexible(
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -476,7 +475,7 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                     const SizedBox(height: 12),
                   ],
 
-                  // Manage Join Requests — Founder only
+                  // Manage Join Requests + Funding Requests — Founder only
                   if (isOwn) ...[
                     _ActionButton(
                       label: 'Manage Join Requests',
@@ -486,6 +485,18 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                         MaterialPageRoute(
                           builder: (_) =>
                               JoinRequestManagementScreen(idea: idea),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _ActionButton(
+                      label: 'Manage Funding Requests',
+                      icon: Icons.attach_money_rounded,
+                      color: accent,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              InvestmentRequestManagementScreen(idea: idea),
                         ),
                       ),
                     ),
@@ -505,12 +516,27 @@ class _IdeaDetailScreenState extends State<IdeaDetailScreen> {
                       ),
                     ),
 
-                  // Investor action — Request Document only (funding chip removed)
+                  // Investor actions — Fund Interest + Send Proposal + Request Document
                   if (userRole == 'investor' && !isOwn) ...[
+                    _FundInterestButton(idea: idea),
+                    const SizedBox(height: 12),
                     _ActionButton(
-                      label: 'Request Document',
-                      icon: Icons.description_outlined,
+                      label: 'Send Investment Proposal',
+                      icon: Icons.campaign_outlined,
                       color: const Color(0xFFF59E0B),
+                      onTap: () => showDialog(
+                        context: context,
+                        builder: (_) => SendFundingRequestDialog(
+                          ideaId: idea.id,
+                          ideaTitle: idea.title,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _ActionButton(
+                      label: 'Request Documents',
+                      icon: Icons.description_outlined,
+                      color: const Color(0xFFF59E0B).withOpacity(0.7),
                       onTap: () => showDialog(
                         context: context,
                         builder: (_) => SendDocRequestDialog(
@@ -895,7 +921,6 @@ class _FeedbackTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              // FIX: Expanded prevents name from pushing stars off-screen
               Expanded(
                 child: Text(
                   feedback.userName ?? 'User',
@@ -1030,9 +1055,9 @@ class _TeamDiscussionButtonState extends State<_TeamDiscussionButton>
     setState(() => _loading = true);
 
     final thread = await context.read<DiscussionProvider>().getOrCreateThread(
-      ideaId: widget.idea.id,
-      title: widget.idea.title,
-    );
+          ideaId: widget.idea.id,
+          title: widget.idea.title,
+        );
 
     if (!mounted) return;
     setState(() => _loading = false);
@@ -1060,6 +1085,123 @@ class _TeamDiscussionButtonState extends State<_TeamDiscussionButton>
       icon: Icons.forum_outlined,
       color: widget.accent,
       onTap: _loading ? () {} : _onTap,
+    );
+  }
+}
+
+// ─── Fund Interest Button (Quick Action) ──────────────────────────────────────
+
+class _FundInterestButton extends StatelessWidget {
+  const _FundInterestButton({required this.idea});
+  final StartupIdea idea;
+
+  @override
+  Widget build(BuildContext context) {
+    final funded = idea.hasFundingInterest;
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: funded
+            ? null
+            : () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    backgroundColor: const Color(0xFF1A1A1A),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    title: const Text(
+                      'Express Funding Interest',
+                      style: TextStyle(
+                        fontFamily: 'Sora',
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                    content: const Text(
+                      'Your contact details (name, email, profile) will be shared with the Founder. The actual investment deal happens outside the platform.',
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        color: Colors.white70,
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontFamily: 'DM Sans',
+                            color: Colors.white54,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text(
+                          'Confirm',
+                          style: TextStyle(
+                            fontFamily: 'DM Sans',
+                            color: Color(0xFFF59E0B),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm != true || !context.mounted) return;
+
+                try {
+                  await context.read<IdeaProvider>().fundInterest(idea.id);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Funding interest sent to the Founder!'),
+                        backgroundColor: Color(0xFFF59E0B),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(e.toString()),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+        icon: Icon(
+          funded ? Icons.bolt_rounded : Icons.bolt_outlined,
+          size: 20,
+          color: Colors.white,
+        ),
+        label: Text(
+          funded ? 'Funding Interest Sent' : 'Express Funding Interest',
+          style: const TextStyle(
+            fontFamily: 'DM Sans',
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: funded
+              ? const Color(0xFFF59E0B).withOpacity(0.5)
+              : const Color(0xFFF59E0B),
+          disabledBackgroundColor: const Color(0xFFF59E0B).withOpacity(0.3),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+      ),
     );
   }
 }

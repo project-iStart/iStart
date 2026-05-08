@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/user_model.dart';
+import '../my_investment_requests_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -265,6 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       );
     } else {
+      // Investor
       return Column(
         children: [
           const _SectionHeader('Investment Info'),
@@ -277,6 +279,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'Portfolio / LinkedIn Link',
             _portfolioCtrl,
             hint: 'https://...',
+          ),
+          const SizedBox(height: 16),
+
+          // My Investment Proposals button
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const MyInvestmentRequestsScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.campaign_outlined,
+                size: 20,
+                color: Color(0xFFF59E0B),
+              ),
+              label: const Text(
+                'My Investment Proposals',
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFF59E0B),
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                side: const BorderSide(color: Color(0xFFF59E0B), width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
         ],
       );

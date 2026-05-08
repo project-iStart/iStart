@@ -15,25 +15,25 @@ router.post('/', auth, async (req, res) => {
     const idea = await StartupIdea.findById(startupIdeaId);
     if (!idea) return res.status(404).json({ msg: 'Idea not found' });
 
-    const existing = await InvestmentRequest.findOne({ 
-      investor: req.user.id, 
+    const existing = await InvestmentRequest.findOne({
+      investor: req.user.id,
       startupIdea: startupIdeaId,
       status: 'pending'
     });
     if (existing) return res.status(400).json({ msg: 'Request already sent' });
 
-    const request = new InvestmentRequest({ 
-      investor: req.user.id, 
-      startupIdea: startupIdeaId, 
+    const request = new InvestmentRequest({
+      investor: req.user.id,
+      startupIdea: startupIdeaId,
       fundingAmount,
-      message 
+      message
     });
     await request.save();
 
     await Notification.create({
       user: idea.founder,
       message: `New funding request received from an investor for "${idea.title}".`,
-      type: 'investment_request', 
+      type: 'investment_request',
       refId: request._id
     });
 
@@ -67,7 +67,7 @@ router.get('/:ideaId', auth, async (req, res) => {
       return res.status(403).json({ msg: 'Not authorized' });
 
     const requests = await InvestmentRequest.find({ startupIdea: req.params.ideaId })
-      .populate('investor', 'name profileImage investmentFocus portfolioLink');
+      .populate('investor', 'name email profileImage investmentFocus portfolioLink');
     res.json(requests);
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
